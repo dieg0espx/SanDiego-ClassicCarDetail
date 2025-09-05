@@ -66,14 +66,14 @@ export default function Testimonials() {
   };
 
   return (
-    <section className="py-20 bg-gray-50">
+    <section className="py-16 sm:py-20 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+        <div className="text-center mb-12 sm:mb-16">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
             What Our Customers Say
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-4">
             Don't just take our word for it - hear from classic car owners across San Diego County who trust us with their prized vehicles.
           </p>
         </div>
@@ -85,33 +85,33 @@ export default function Testimonials() {
           <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-gray-50 to-transparent z-10 pointer-events-none"></div>
           
           {/* First Row - Scrolling Left */}
-          <div className="flex animate-scroll-left mb-8">
+          <div className="flex animate-scroll-left mb-6 sm:mb-8">
             {[...testimonials.testimonials, ...testimonials.testimonials].map((testimonial, index) => (
               <div
                 key={`left-${index}`}
-                className="flex-shrink-0 w-80 mx-4"
+                className="flex-shrink-0 w-72 sm:w-80 mx-2 sm:mx-4"
               >
-                <div className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow duration-300 h-full">
+                <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 hover:shadow-xl transition-shadow duration-300 h-full">
                   {/* Rating Stars */}
-                  <div className="flex items-center mb-4">
+                  <div className="flex items-center mb-3 sm:mb-4">
                     {renderStars(testimonial.rating)}
                   </div>
 
                   {/* Testimonial Text */}
-                  <blockquote className="text-gray-700 mb-6 italic text-sm">
+                  <blockquote className="text-gray-700 mb-4 sm:mb-6 italic text-xs sm:text-sm">
                     "{testimonial.text}"
                   </blockquote>
 
                   {/* Car Information */}
-                  <div className="mb-4">
-                    <p className="text-sm font-semibold text-red-600 uppercase tracking-wide">
+                  <div className="mb-3 sm:mb-4">
+                    <p className="text-xs sm:text-sm font-semibold text-red-600 uppercase tracking-wide">
                       {testimonial.car}
                     </p>
                   </div>
 
                   {/* Customer Info */}
-                  <div className="border-t pt-4">
-                    <p className="font-semibold text-gray-900 text-sm">{testimonial.name}</p>
+                  <div className="border-t pt-3 sm:pt-4">
+                    <p className="font-semibold text-gray-900 text-xs sm:text-sm">{testimonial.name}</p>
                     <p className="text-xs text-gray-500">{testimonial.location}</p>
                   </div>
                 </div>
@@ -120,33 +120,33 @@ export default function Testimonials() {
           </div>
 
           {/* Second Row - Scrolling Right */}
-          <div className="flex animate-scroll-right py-6">
+          <div className="flex animate-scroll-right py-4 sm:py-6">
             {[...testimonials.testimonials, ...testimonials.testimonials].map((testimonial, index) => (
               <div
                 key={`right-${index}`}
-                className="flex-shrink-0 w-80 mx-4"
+                className="flex-shrink-0 w-72 sm:w-80 mx-2 sm:mx-4"
               >
-                <div className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow duration-300 h-full">
+                <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 hover:shadow-xl transition-shadow duration-300 h-full">
                   {/* Rating Stars */}
-                  <div className="flex items-center mb-4">
+                  <div className="flex items-center mb-3 sm:mb-4">
                     {renderStars(testimonial.rating)}
                   </div>
 
                   {/* Testimonial Text */}
-                  <blockquote className="text-gray-700 mb-6 italic text-sm">
+                  <blockquote className="text-gray-700 mb-4 sm:mb-6 italic text-xs sm:text-sm">
                     "{testimonial.text}"
                   </blockquote>
 
                   {/* Car Information */}
-                  <div className="mb-4">
-                    <p className="text-sm font-semibold text-red-600 uppercase tracking-wide">
+                  <div className="mb-3 sm:mb-4">
+                    <p className="text-xs sm:text-sm font-semibold text-red-600 uppercase tracking-wide">
                       {testimonial.car}
                     </p>
                   </div>
 
                   {/* Customer Info */}
-                  <div className="border-t pt-4">
-                    <p className="font-semibold text-gray-900 text-sm">{testimonial.name}</p>
+                  <div className="border-t pt-3 sm:pt-4">
+                    <p className="font-semibold text-gray-900 text-xs sm:text-sm">{testimonial.name}</p>
                     <p className="text-xs text-gray-500">{testimonial.location}</p>
                   </div>
                 </div>
@@ -156,13 +156,13 @@ export default function Testimonials() {
         </div>
 
         {/* Bottom CTA */}
-        <div className="text-center mt-16">
-          <p className="text-lg text-gray-600 mb-6">
+        <div className="text-center mt-12 sm:mt-16">
+          <p className="text-base sm:text-lg text-gray-600 mb-4 sm:mb-6 px-4">
             Ready to experience the same level of care for your classic car?
           </p>
           <a
             href="tel:(760) 518-8451"
-            className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors shadow-lg inline-block"
+            className="bg-red-600 hover:bg-red-700 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-semibold transition-colors shadow-lg inline-block"
           >
             Get Your Quote Today
           </a>

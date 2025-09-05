@@ -66,20 +66,20 @@ export default function FAQ() {
   const renderFAQItem = (item) => (
     <div
       key={item.id}
-      className="bg-gray-800 rounded-lg shadow-sm border border-gray-700 overflow-hidden h-fit mb-4"
+      className="bg-gray-800 rounded-lg shadow-sm border border-gray-700 overflow-hidden h-fit mb-3 sm:mb-4"
     >
       {/* Question Button */}
       <button
         onClick={() => toggleItem(item.id)}
-        className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-700 transition-colors focus:outline-none"
+        className="w-full px-4 sm:px-6 py-3 sm:py-4 text-left flex items-center justify-between hover:bg-gray-700 transition-colors focus:outline-none"
         aria-expanded={openItems.has(item.id)}
       >
-        <span className="text-lg font-semibold text-white pr-4">
+        <span className="text-base sm:text-lg font-semibold text-white pr-2 sm:pr-4">
           {item.question}
         </span>
         <div className="flex-shrink-0">
           <svg
-            className={`w-5 h-5 text-red-600 transform transition-transform duration-200 ${
+            className={`w-4 h-4 sm:w-5 sm:h-5 text-red-600 transform transition-transform duration-200 ${
               openItems.has(item.id) ? 'rotate-180' : ''
             }`}
             fill="none"
@@ -102,8 +102,8 @@ export default function FAQ() {
           openItems.has(item.id) ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
-        <div className="px-6 pb-4">
-          <p className="text-gray-300 leading-relaxed">
+        <div className="px-4 sm:px-6 pb-3 sm:pb-4">
+          <p className="text-gray-300 leading-relaxed text-sm sm:text-base">
             {item.answer}
           </p>
         </div>
@@ -112,49 +112,49 @@ export default function FAQ() {
   )
 
   return (
-    <section className="py-[100px] bg-gray-900">
+    <section className="py-16 sm:py-20 lg:py-[100px] bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center mb-12">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+        <div className="text-center mb-10 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-3 sm:mb-4">
             Frequently Asked Questions
           </h2>
-          <p className="text-lg text-gray-300 max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg text-gray-300 max-w-2xl mx-auto px-4">
             Get answers to common questions about our mobile car detailing services
           </p>
         </div>
 
         {/* FAQ Accordion */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
           {/* Left Column */}
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {leftColumnItems.map(renderFAQItem)}
           </div>
           
           {/* Right Column */}
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {rightColumnItems.map(renderFAQItem)}
           </div>
         </div>
 
         {/* Contact CTA */}
-        <div className="text-center mt-12">
-          <p className="text-gray-300 mb-6">
+        <div className="text-center mt-10 sm:mt-12">
+          <p className="text-gray-300 mb-4 sm:mb-6 text-sm sm:text-base px-4">
             Still have questions? We're here to help!
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4">
             <a
               href="tel:(760) 518-8451"
-              className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg flex items-center font-semibold transition-colors"
+              className="bg-red-600 hover:bg-red-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg flex items-center font-semibold transition-colors text-sm sm:text-base w-full sm:w-auto justify-center"
             >
-              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 011.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
               </svg>
               Call (760) 518-8451
             </a>
             <a
               href="#quote"
-              className="bg-gray-800 hover:bg-gray-700 text-white border border-gray-600 px-6 py-3 rounded-lg font-semibold transition-colors"
+              className="bg-gray-800 hover:bg-gray-700 text-white border border-gray-600 px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold transition-colors text-sm sm:text-base w-full sm:w-auto"
             >
               Request Quote
             </a>
