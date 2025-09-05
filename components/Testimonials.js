@@ -120,7 +120,7 @@ export default function Testimonials() {
           </div>
 
           {/* Second Row - Scrolling Right */}
-          <div className="flex animate-scroll-right">
+          <div className="flex animate-scroll-right py-6">
             {[...testimonials.testimonials, ...testimonials.testimonials].map((testimonial, index) => (
               <div
                 key={`right-${index}`}
