@@ -59,73 +59,87 @@ export default function FAQ() {
     setOpenItems(newOpenItems)
   }
 
+  // Split FAQ data into two columns
+  const leftColumnItems = faqData.filter((_, index) => index % 2 === 0)
+  const rightColumnItems = faqData.filter((_, index) => index % 2 === 1)
+
+  const renderFAQItem = (item) => (
+    <div
+      key={item.id}
+      className="bg-gray-800 rounded-lg shadow-sm border border-gray-700 overflow-hidden h-fit mb-4"
+    >
+      {/* Question Button */}
+      <button
+        onClick={() => toggleItem(item.id)}
+        className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-700 transition-colors focus:outline-none"
+        aria-expanded={openItems.has(item.id)}
+      >
+        <span className="text-lg font-semibold text-white pr-4">
+          {item.question}
+        </span>
+        <div className="flex-shrink-0">
+          <svg
+            className={`w-5 h-5 text-red-600 transform transition-transform duration-200 ${
+              openItems.has(item.id) ? 'rotate-180' : ''
+            }`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+        </div>
+      </button>
+
+      {/* Answer Content */}
+      <div
+        className={`overflow-hidden transition-all duration-300 ease-in-out ${
+          openItems.has(item.id) ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+        }`}
+      >
+        <div className="px-6 pb-4">
+          <p className="text-gray-300 leading-relaxed">
+            {item.answer}
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+
   return (
-    <section className="py-16 bg-gray-50">
+    <section className="py-[100px] bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-12">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
             Frequently Asked Questions
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-300 max-w-2xl mx-auto">
             Get answers to common questions about our mobile car detailing services
           </p>
         </div>
 
         {/* FAQ Accordion */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {faqData.map((item) => (
-            <div
-              key={item.id}
-              className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden h-fit"
-            >
-              {/* Question Button */}
-              <button
-                onClick={() => toggleItem(item.id)}
-                className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors focus:outline-none"
-                aria-expanded={openItems.has(item.id)}
-              >
-                <span className="text-lg font-semibold text-gray-900 pr-4">
-                  {item.question}
-                </span>
-                <div className="flex-shrink-0">
-                  <svg
-                    className={`w-5 h-5 text-red-600 transform transition-transform duration-200 ${
-                      openItems.has(item.id) ? 'rotate-180' : ''
-                    }`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </div>
-              </button>
-
-              {/* Answer Content */}
-              <div
-                className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                  openItems.has(item.id) ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-                }`}
-              >
-                <div className="px-6 pb-4">
-                  <p className="text-gray-700 leading-relaxed">
-                    {item.answer}
-                  </p>
-                </div>
-              </div>
-            </div>
-          ))}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left Column */}
+          <div className="space-y-4">
+            {leftColumnItems.map(renderFAQItem)}
+          </div>
+          
+          {/* Right Column */}
+          <div className="space-y-4">
+            {rightColumnItems.map(renderFAQItem)}
+          </div>
         </div>
 
         {/* Contact CTA */}
         <div className="text-center mt-12">
-          <p className="text-gray-600 mb-6">
+          <p className="text-gray-300 mb-6">
             Still have questions? We're here to help!
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
@@ -140,7 +154,7 @@ export default function FAQ() {
             </a>
             <a
               href="#quote"
-              className="bg-white hover:bg-gray-50 text-red-600 px-6 py-3 rounded-lg font-semibold transition-colors"
+              className="bg-gray-800 hover:bg-gray-700 text-white border border-gray-600 px-6 py-3 rounded-lg font-semibold transition-colors"
             >
               Request Quote
             </a>
