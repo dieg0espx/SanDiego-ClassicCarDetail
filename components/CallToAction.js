@@ -9,8 +9,8 @@ export default function CallToAction() {
           Call us today for a personalized quote
         </p>
         <div className="mt-8">
-          <a href="tel:(619) 745-4634" className="bg-white hover:bg-gray-100 text-red-600 font-bold px-8 py-4 rounded-lg text-lg transition-colors inline-block">
-            (619) 745-4634
+          <a href="tel:(760) 518-8451" className="bg-white hover:bg-gray-100 text-red-600 font-bold px-8 py-4 rounded-lg text-lg transition-colors inline-block">
+            (760) 518-8451
           </a>
         </div>
       </div>

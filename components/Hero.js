@@ -38,7 +38,7 @@ export default function Hero() {
         {/* Call-to-Action Buttons */}
         <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6">
           <a
-            href="tel:(619) 745-4634"
+            href="tel:(760) 518-8451"
             className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-lg flex items-center text-lg font-semibold transition-colors shadow-lg"
           >
             <svg className="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20">

@@ -71,7 +71,7 @@ export default function Services() {
               </ul>
               
               <div className="text-center">
-                <a href="tel:(619) 745-4634" className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors inline-block">
+                <a href="tel:(760) 518-8451" className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors inline-block">
                   Book Now
                 </a>
               </div>
@@ -125,7 +125,7 @@ export default function Services() {
               </ul>
               
               <div className="text-center">
-                <a href="tel:(619) 745-4634" className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors inline-block">
+                <a href="tel:(760) 518-8451" className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors inline-block">
                   Book Now
                 </a>
               </div>
@@ -167,7 +167,7 @@ export default function Services() {
               </ul>
               
               <div className="text-center">
-                <a href="tel:(619) 745-4634" className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors inline-block">
+                <a href="tel:(760) 518-8451" className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors inline-block">
                   Book Now
                 </a>
               </div>
