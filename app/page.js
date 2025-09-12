@@ -5,6 +5,7 @@ import Stats from '../components/Stats'
 import WhyChooseUs from '../components/WhyChooseUs'
 import Testimonials from '../components/Testimonials'
 import FAQ from '../components/FAQ'
+import LoyaltyClub from '../components/LoyaltyClub'
 import ContactCTA from '../components/ContactCTA'
 import Pricing from '../components/PricingTable'
 
@@ -31,10 +32,16 @@ export default function Home() {
       {/* Testimonials Section */}
       <Testimonials />
 
+
+
+
       {/* FAQ Section */}
       <FAQ />
 
       <ContactCTA />
+
+            {/* Loyalty Club Section */}
+            <LoyaltyClub />
     </main>
   )
 }
