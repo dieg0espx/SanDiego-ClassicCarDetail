@@ -7,6 +7,9 @@ module.exports = {
   ],
   theme: {
     extend: {
+      colors: {
+        gold: '#AF945B',
+      },
       animation: {
         'fade-in': 'fadeIn 0.8s ease-out forwards',
         'fade-in-delay-3': 'fadeIn 0.8s ease-out 0.3s both',

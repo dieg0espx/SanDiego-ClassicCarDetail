@@ -63,7 +63,7 @@ export default function ContactForm() {
               value={formData.name}
               onChange={handleChange}
               required
-              className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors text-sm sm:text-base"
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent transition-colors text-sm sm:text-base"
               placeholder="Your full name"
             />
           </div>
@@ -79,7 +79,7 @@ export default function ContactForm() {
               value={formData.email}
               onChange={handleChange}
               required
-              className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors text-sm sm:text-base"
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent transition-colors text-sm sm:text-base"
               placeholder="your.email@example.com"
             />
           </div>
@@ -96,7 +96,7 @@ export default function ContactForm() {
               name="phone"
               value={formData.phone}
               onChange={handleChange}
-              className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors text-sm sm:text-base"
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent transition-colors text-sm sm:text-base"
               placeholder="(760) 123-4567"
             />
           </div>
@@ -110,7 +110,7 @@ export default function ContactForm() {
               name="service"
               value={formData.service}
               onChange={handleChange}
-              className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors text-sm sm:text-base"
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent transition-colors text-sm sm:text-base"
             >
               <option value="">Select a service</option>
               <option value="basic-detail">Basic Detail</option>
@@ -135,7 +135,7 @@ export default function ContactForm() {
             onChange={handleChange}
             required
             rows={4}
-            className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors resize-vertical text-sm sm:text-base"
+            className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent transition-colors resize-vertical text-sm sm:text-base"
             placeholder="Tell us about your vehicle and what services you're interested in..."
           />
         </div>
@@ -147,7 +147,7 @@ export default function ContactForm() {
         )}
 
         {submitStatus === 'error' && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
+          <div className="bg-gold border border-gold text-gold px-4 py-3 rounded-lg">
             There was an error sending your message. Please try again or call us directly.
           </div>
         )}
@@ -155,7 +155,7 @@ export default function ContactForm() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white font-bold py-3 sm:py-4 px-4 sm:px-6 rounded-lg transition-colors duration-200 flex items-center justify-center text-sm sm:text-base"
+          className="w-full bg-gold hover:bg-gold disabled:bg-gray-400 text-white font-bold py-3 sm:py-4 px-4 sm:px-6 rounded-lg transition-colors duration-200 flex items-center justify-center text-sm sm:text-base"
         >
           {isSubmitting ? (
             <>

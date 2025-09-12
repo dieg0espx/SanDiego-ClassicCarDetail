@@ -46,7 +46,7 @@ export default function Testimonials() {
         name: "Jennifer Walsh",
         location: "Rancho Santa Fe, CA",
         rating: 5,
-        text: "San Diego Classic Car Detail is simply the best. They treated my Range Rover with the care it deserves. The results speak for themselves - my car looks absolutely stunning.",
+        text: "San Diego Classic Auto Detail is simply the best. They treated my Range Rover with the care it deserves. The results speak for themselves - my car looks absolutely stunning.",
         car: "Range Rover"
       }
     ]
@@ -70,11 +70,11 @@ export default function Testimonials() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-12 sm:mb-16">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-black mb-3 sm:mb-4">
             What Our Customers Say
           </h2>
           <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-4">
-            Don't just take our word for it - hear from classic car owners across San Diego County who trust us with their prized vehicles.
+            Don't just take our word for it - hear from classic auto owners across San Diego County who trust us with their prized vehicles.
           </p>
         </div>
 
@@ -104,14 +104,14 @@ export default function Testimonials() {
 
                   {/* Car Information */}
                   <div className="mb-3 sm:mb-4">
-                    <p className="text-xs sm:text-sm font-semibold text-red-600 uppercase tracking-wide">
+                    <p className="text-xs sm:text-sm font-semibold text-gold uppercase tracking-wide">
                       {testimonial.car}
                     </p>
                   </div>
 
                   {/* Customer Info */}
                   <div className="border-t pt-3 sm:pt-4">
-                    <p className="font-semibold text-gray-900 text-xs sm:text-sm">{testimonial.name}</p>
+                    <p className="font-semibold text-black text-xs sm:text-sm">{testimonial.name}</p>
                     <p className="text-xs text-gray-500">{testimonial.location}</p>
                   </div>
                 </div>
@@ -139,14 +139,14 @@ export default function Testimonials() {
 
                   {/* Car Information */}
                   <div className="mb-3 sm:mb-4">
-                    <p className="text-xs sm:text-sm font-semibold text-red-600 uppercase tracking-wide">
+                    <p className="text-xs sm:text-sm font-semibold text-gold uppercase tracking-wide">
                       {testimonial.car}
                     </p>
                   </div>
 
                   {/* Customer Info */}
                   <div className="border-t pt-3 sm:pt-4">
-                    <p className="font-semibold text-gray-900 text-xs sm:text-sm">{testimonial.name}</p>
+                    <p className="font-semibold text-black text-xs sm:text-sm">{testimonial.name}</p>
                     <p className="text-xs text-gray-500">{testimonial.location}</p>
                   </div>
                 </div>
@@ -158,11 +158,11 @@ export default function Testimonials() {
         {/* Bottom CTA */}
         <div className="text-center mt-12 sm:mt-16">
           <p className="text-base sm:text-lg text-gray-600 mb-4 sm:mb-6 px-4">
-            Ready to experience the same level of care for your classic car?
+            Ready to experience the same level of care for your classic auto?
           </p>
           <a
             href="tel:(760) 518-8451"
-            className="bg-red-600 hover:bg-red-700 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-semibold transition-colors shadow-lg inline-block"
+            className="bg-gold hover:bg-gold text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-semibold transition-colors shadow-lg inline-block"
           >
             Get Your Quote Today
           </a>

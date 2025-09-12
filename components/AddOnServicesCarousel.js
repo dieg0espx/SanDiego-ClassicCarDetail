@@ -79,8 +79,8 @@ export default function AddOnServicesCarousel() {
             <div className="bg-white border border-gray-100 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 h-[400px] group hover:-translate-y-1 flex flex-col">
               {/* Icon Section */}
               <div className="flex justify-center mb-6">
-                <div className="w-16 h-16 bg-gradient-to-br from-red-50 to-red-100 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-16 h-16 bg-gradient-to-br from-gold to-gold rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <svg className="w-8 h-8 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={service.icon} />
                   </svg>
                 </div>
@@ -88,12 +88,12 @@ export default function AddOnServicesCarousel() {
               
               {/* Content Section */}
               <div className="text-center h-[280px] flex flex-col">
-                <h3 className="text-xl font-bold text-gray-900 mb-4 leading-tight h-[4rem] flex items-center justify-center">
+                <h3 className="text-xl font-bold text-black mb-4 leading-tight h-[4rem] flex items-center justify-center">
                   {service.title}
                 </h3>
                 
                 <div className="mb-4 h-[4rem]">
-                  <div className={`font-bold text-red-600 ${service.price.includes('Quote') ? 'text-2xl' : 'text-4xl'}`}>
+                  <div className={`font-bold text-gold ${service.price.includes('Quote') ? 'text-2xl' : 'text-4xl'}`}>
                     {service.price}
                   </div>
                   {!service.price.includes('Quote') && (
@@ -108,7 +108,7 @@ export default function AddOnServicesCarousel() {
               
               {/* Decorative Element */}
               <div className="mt-6 flex justify-center">
-                <div className="w-12 h-1 bg-red-200 rounded-full group-hover:bg-red-300 transition-colors duration-300"></div>
+                <div className="w-12 h-1 bg-gold rounded-full group-hover:bg-gold transition-colors duration-300"></div>
               </div>
             </div>
           </div>

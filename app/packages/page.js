@@ -9,7 +9,7 @@ export default function Packages() {
 
       
       {/* Hero Section */}
-      <section className="bg-gray-900 text-white py-20">
+      <section className="bg-black text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl font-bold sm:text-5xl">
@@ -26,7 +26,7 @@ export default function Packages() {
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">
+            <h2 className="text-3xl font-bold text-black sm:text-4xl">
               Choose Your Perfect Package
             </h2>
             <p className="mt-4 text-lg text-gray-500">
@@ -38,32 +38,32 @@ export default function Packages() {
             {/* The Classic Wash */}
             <div className="bg-white rounded-lg shadow-lg p-8 relative">
               <div className="text-center">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">The Classic Wash</h3>
-                <div className="text-4xl font-bold text-red-600 mb-4">$125</div>
+                <h3 className="text-2xl font-bold text-black mb-2">The Classic Wash</h3>
+                <div className="text-4xl font-bold text-gold mb-4">$170</div>
                 <p className="text-gray-600 mb-6">Perfect for a quick, refreshing clean.</p>
               </div>
               
               <ul className="space-y-3 mb-8">
                 <li className="flex items-start">
-                  <svg className="w-5 h-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 text-gold mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                   <span className="text-gray-700">Two stage hand wash (prewash, contact wash)</span>
                 </li>
                 <li className="flex items-start">
-                  <svg className="w-5 h-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 text-gold mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                   <span className="text-gray-700">Wheel cleaning, tires dressed</span>
                 </li>
                 <li className="flex items-start">
-                  <svg className="w-5 h-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 text-gold mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                   <span className="text-gray-700">Light interior vacuum</span>
                 </li>
                 <li className="flex items-start">
-                  <svg className="w-5 h-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 text-gold mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                   <span className="text-gray-700">Dashboard and console wipe down</span>
@@ -71,53 +71,53 @@ export default function Packages() {
               </ul>
               
               <div className="text-center">
-                <a href="tel:(760) 518-8451" className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors inline-block">
+                <a href="tel:(760) 518-8451" className="bg-gold hover:bg-gold text-white px-6 py-3 rounded-lg font-semibold transition-colors inline-block">
                   Book Now
                 </a>
               </div>
             </div>
 
             {/* The Sunset Shine */}
-            <div className="bg-white rounded-lg shadow-lg p-8 relative border-2 border-red-600">
+            <div className="bg-white rounded-lg shadow-lg p-8 relative border-2 border-gold">
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                <span className="bg-red-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
+                <span className="bg-gold text-white px-4 py-1 rounded-full text-sm font-semibold">
                   Most Popular
                 </span>
               </div>
               
               <div className="text-center">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">The Sunset Shine</h3>
-                <div className="text-4xl font-bold text-red-600 mb-4">$180</div>
+                <h3 className="text-2xl font-bold text-black mb-2">The Sunset Shine</h3>
+                <div className="text-4xl font-bold text-gold mb-4">$200</div>
                 <p className="text-gray-600 mb-6">Our most popular wash - a deeper clean with that SoCal sunset glow.</p>
               </div>
               
               <ul className="space-y-3 mb-8">
                 <li className="flex items-start">
-                  <svg className="w-5 h-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 text-gold mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                   <span className="text-gray-700">Everything in the classic wash</span>
                 </li>
                 <li className="flex items-start">
-                  <svg className="w-5 h-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 text-gold mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                   <span className="text-gray-700">In depth interior vacuum and UV protectant wipe down (leather protection included)</span>
                 </li>
                 <li className="flex items-start">
-                  <svg className="w-5 h-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 text-gold mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                   <span className="text-gray-700">Door jambs cleaned</span>
                 </li>
                 <li className="flex items-start">
-                  <svg className="w-5 h-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 text-gold mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                   <span className="text-gray-700">Revitalizing Plastic dressing / protectant</span>
                 </li>
                 <li className="flex items-start">
-                  <svg className="w-5 h-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 text-gold mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                   <span className="text-gray-700">Spray wax added for shine & protection</span>
@@ -125,7 +125,7 @@ export default function Packages() {
               </ul>
               
               <div className="text-center">
-                <a href="tel:(760) 518-8451" className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors inline-block">
+                <a href="tel:(760) 518-8451" className="bg-gold hover:bg-gold text-white px-6 py-3 rounded-lg font-semibold transition-colors inline-block">
                   Book Now
                 </a>
               </div>
@@ -134,32 +134,32 @@ export default function Packages() {
             {/* The Hot Rod Detail */}
             <div className="bg-white rounded-lg shadow-lg p-8 relative">
               <div className="text-center">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">The Hot Rod Detail</h3>
-                <div className="text-4xl font-bold text-red-600 mb-4">$250</div>
+                <h3 className="text-2xl font-bold text-black mb-2">The Hot Rod Detail</h3>
+                <div className="text-4xl font-bold text-gold mb-4">$270</div>
                 <p className="text-gray-600 mb-6">Inspired by classic show cars - for when you want your ride to turn heads.</p>
               </div>
               
               <ul className="space-y-3 mb-8">
                 <li className="flex items-start">
-                  <svg className="w-5 h-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 text-gold mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                   <span className="text-gray-700">Everything in the sunset shine</span>
                 </li>
                 <li className="flex items-start">
-                  <svg className="w-5 h-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 text-gold mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                   <span className="text-gray-700">Three step hand wash and wax (Pre-wash, contact wash, hydro foam with wax sealant)</span>
                 </li>
                 <li className="flex items-start">
-                  <svg className="w-5 h-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 text-gold mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                   <span className="text-gray-700">Detailed wheel & tire cleaning</span>
                 </li>
                 <li className="flex items-start">
-                  <svg className="w-5 h-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 text-gold mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                   <span className="text-gray-700">Full in depth interior vacuum, shampoo, leather reconditioning</span>
@@ -167,7 +167,7 @@ export default function Packages() {
               </ul>
               
               <div className="text-center">
-                <a href="tel:(760) 518-8451" className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors inline-block">
+                <a href="tel:(760) 518-8451" className="bg-gold hover:bg-gold text-white px-6 py-3 rounded-lg font-semibold transition-colors inline-block">
                   Book Now
                 </a>
               </div>
@@ -180,7 +180,7 @@ export default function Packages() {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">
+            <h2 className="text-3xl font-bold text-black sm:text-4xl">
               Add-on Services
             </h2>
             <p className="mt-4 text-lg text-gray-500">
@@ -199,7 +199,7 @@ export default function Packages() {
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">
+            <h2 className="text-3xl font-bold text-black sm:text-4xl">
               Service Area & Travel Fees
             </h2>
             <p className="mt-4 text-lg text-gray-500">
@@ -218,7 +218,7 @@ export default function Packages() {
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-1">Free Service Area</h3>
+                <h3 className="text-xl font-bold text-black mb-1">Free Service Area</h3>
                 <p className="text-sm text-gray-600">0-15 miles from Vista</p>
               </div>
               
@@ -238,7 +238,7 @@ export default function Packages() {
                     <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-1">Extended Area</h3>
+                <h3 className="text-xl font-bold text-black mb-1">Extended Area</h3>
                 <p className="text-sm text-gray-600">16-25 miles from Vista</p>
               </div>
               
@@ -251,19 +251,19 @@ export default function Packages() {
             </div>
 
             {/* Premium Area Card */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-red-500">
+            <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-gold">
               <div className="text-center mb-6">
-                <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-                  <svg className="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                <div className="w-12 h-12 bg-gold rounded-xl flex items-center justify-center mx-auto mb-3">
+                  <svg className="w-6 h-6 text-gold" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-1">Premium Area</h3>
+                <h3 className="text-xl font-bold text-black mb-1">Premium Area</h3>
                 <p className="text-sm text-gray-600">25-30 miles from Vista</p>
               </div>
               
               <div className="text-center">
-                <div className="text-3xl font-bold text-red-600 mb-3">+$40</div>
+                <div className="text-3xl font-bold text-gold mb-3">+$40</div>
                 <p className="text-sm text-gray-600 leading-relaxed">
                   Downtown San Diego, Chula Vista, National City, Imperial Beach
                 </p>

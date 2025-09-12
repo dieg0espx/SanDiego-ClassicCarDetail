@@ -63,7 +63,7 @@ export default function Stats() {
               key={index}
               className="p-4 sm:p-6 lg:p-8 text-center"
             >
-              <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-red-600 mb-2 sm:mb-3">
+              <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gold mb-2 sm:mb-3">
                 {isVisible ? (
                   <CountUp
                     end={stat.end}

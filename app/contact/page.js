@@ -2,22 +2,22 @@ import ContactForm from '../../components/ContactForm'
 import ContactInfo from '../../components/ContactInfo'
 
 export const metadata = {
-  title: 'Contact Us - San Diego Classic Car Detail',
-  description: 'Get in touch with San Diego Classic Car Detail for professional mobile detailing services. Call (760) 518-8451 or visit us in Vista, CA 92081',
+  title: 'Contact Us - San Diego Classic Auto Detail',
+  description: 'Get in touch with San Diego Classic Auto Detail for professional mobile detailing services. Call (760) 518-8451 or visit us in Vista, CA 92081',
 }
 
 export default function Contact() {
   return (
     <main className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="bg-gray-900 text-white py-16 sm:py-20">
+      <section className="bg-black text-white py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold mb-4 sm:mb-6">
               Contact Us
             </h1>
             <p className="text-base sm:text-lg lg:text-xl xl:text-2xl text-gray-300 max-w-3xl mx-auto px-4">
-              Ready to give your classic car the attention it deserves? Get in touch with our expert team today.
+              Ready to give your classic auto the attention it deserves? Get in touch with our expert team today.
             </p>
           </div>
         </div>
@@ -37,7 +37,7 @@ export default function Contact() {
             <div className="lg:col-span-2 flex flex-col h-full">
               <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 lg:p-12 flex flex-col h-full">
                 <div className="mb-6 sm:mb-8">
-                  <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">Send us a Message</h3>
+                  <h3 className="text-2xl sm:text-3xl font-bold text-black mb-3 sm:mb-4">Send us a Message</h3>
                   <p className="text-base sm:text-lg text-gray-600">
                     Fill out the form below and we'll get back to you within 24 hours with a personalized quote.
                   </p>
@@ -76,7 +76,7 @@ export default function Contact() {
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Visit Our Location</h2>
+            <h2 className="text-3xl font-bold text-black mb-4">Visit Our Location</h2>
             <p className="text-lg text-gray-600">We're conveniently located in Vista, serving Oceanside, Carlsbad, and surrounding areas throughout San Diego County</p>
           </div>
           
@@ -89,7 +89,7 @@ export default function Contact() {
               allowFullScreen=""
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
-              title="San Diego Classic Car Detail Location"
+              title="San Diego Classic Auto Detail Location"
             ></iframe>
           </div>
         </div>

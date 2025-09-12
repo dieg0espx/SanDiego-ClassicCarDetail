@@ -1,6 +1,6 @@
-# San Diego Classic Car Detail
+# San Diego Classic Auto Detail
 
-A Next.js website for professional classic car detailing services in San Diego.
+A Next.js website for professional classic auto detailing services in San Diego.
 
 ## Features
 

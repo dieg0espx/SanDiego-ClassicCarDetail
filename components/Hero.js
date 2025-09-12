@@ -7,18 +7,27 @@ export default function Hero() {
         loop
         muted
         playsInline
-        className="absolute inset-0 w-full h-full object-cover animate-pulse-slow"
+        className="absolute inset-0 w-full h-full object-cover"
       >
-        <source src="https://res.cloudinary.com/dku1gnuat/video/upload/v1757438619/Untitled_design_4_uei0ec.mp4" type="video/mp4" />
+        <source src="https://res.cloudinary.com/dku1gnuat/video/upload/v1757677265/Untitled_design_5_v03wjj.mp4" type="video/mp4" />
       </video>
 
+      {/* Palm trees overlay */}
+      {/* <div className="absolute inset-0">
+        <img 
+          src="/palmtrees.png" 
+          alt="Palm trees" 
+          className="absolute inset-0 w-full h-full object-cover opacity-20"
+        />
+      </div> */}
+
       {/* Dark overlay for better text readability */}
-      <div className="absolute inset-0 bg-black/80"></div>
+      <div className="absolute inset-0 bg-black/50"></div>
 
       {/* Content Overlay */}
       <div className="relative z-10 text-center text-white px-4 sm:px-6 lg:px-8">
         {/* Badge */}
-        {/* <div className="inline-flex items-center bg-red-600/90 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-semibold mb-6 border border-red-500/30">
+        {/* <div className="inline-flex items-center bg-gold/90 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-semibold mb-6 border border-gold/30">
           <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
           </svg>
@@ -30,7 +39,7 @@ export default function Hero() {
           <span className="inline text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-8xl bg-gradient-to-r from-white via-gray-100 to-white bg-clip-text text-transparent animate-slide-up-delay-1">
             PRECISION
           </span>
-          <span className="inline text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-red-500 font-bold ml-2 animate-slide-up-delay-2">
+          <span className="inline text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-gold font-bold ml-2 animate-slide-up-delay-2">
             DETAILING
           </span>
         </h1>
@@ -38,7 +47,7 @@ export default function Hero() {
         {/* Sub-heading */}
         <div className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-8 animate-fade-in-delay-3">
           <span className="text-white block animate-slide-up-delay-3">Where Every Detail</span>
-          <span className="text-red-500 block animate-slide-up-delay-4">Matters</span>
+          <span className="text-gold block animate-slide-up-delay-4">Matters</span>
         </div>
 
         {/* Feature Pills */}
@@ -61,24 +70,18 @@ export default function Hero() {
         </div>
 
         {/* Call-to-Action Buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6 animate-fade-in-delay-10">
+        <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4 animate-fade-in-delay-10">
           <a
             href="tel:(760) 518-8451"
-            className="group bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-8 sm:px-10 py-4 sm:py-5 rounded-xl flex items-center text-lg sm:text-xl font-bold transition-all duration-500 shadow-2xl hover:shadow-red-500/25 w-full sm:w-auto justify-center transform hover:scale-110 hover:-translate-y-1 animate-slide-up-delay-10"
+            className="text-gold hover:text-white border border-gold/50 hover:border-gold hover:bg-gold/10 px-5 py-2 rounded-md text-sm font-normal transition-all duration-200 w-full sm:w-auto text-center animate-slide-up-delay-10"
           >
-            <svg className="w-6 h-6 mr-3 group-hover:animate-bounce" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 011.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
-            </svg>
             Call Now
           </a>
           <a
             href="/contact"
-            className="group bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white border-2 border-white/30 hover:border-white/50 px-8 sm:px-10 py-4 sm:py-5 rounded-xl text-lg sm:text-xl font-bold transition-all duration-500 shadow-lg w-full sm:w-auto transform hover:scale-110 hover:-translate-y-1 animate-slide-up-delay-11"
+            className="text-white hover:text-gold border border-white/30 hover:border-white/60 px-5 py-2 rounded-md text-sm font-normal transition-all duration-200 w-full sm:w-auto text-center animate-slide-up-delay-11"
           >
             Get Free Quote
-            <svg className="w-5 h-5 ml-2 inline group-hover:translate-x-2 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-            </svg>
           </a>
         </div>
 

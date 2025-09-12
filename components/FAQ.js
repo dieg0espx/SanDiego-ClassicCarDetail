@@ -79,7 +79,7 @@ export default function FAQ() {
         </span>
         <div className="flex-shrink-0">
           <svg
-            className={`w-4 h-4 sm:w-5 sm:h-5 text-red-600 transform transition-transform duration-200 ${
+            className={`w-4 h-4 sm:w-5 sm:h-5 text-gold transform transition-transform duration-200 ${
               openItems.has(item.id) ? 'rotate-180' : ''
             }`}
             fill="none"
@@ -112,7 +112,7 @@ export default function FAQ() {
   )
 
   return (
-    <section className="py-16 sm:py-20 lg:py-[100px] bg-gray-900">
+    <section className="py-16 sm:py-20 lg:py-[100px] bg-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-10 sm:mb-12">
@@ -145,7 +145,7 @@ export default function FAQ() {
           <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4">
             <a
               href="tel:(760) 518-8451"
-              className="bg-red-600 hover:bg-red-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg flex items-center font-semibold transition-colors text-sm sm:text-base w-full sm:w-auto justify-center"
+              className="bg-gold hover:bg-gold text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg flex items-center font-semibold transition-colors text-sm sm:text-base w-full sm:w-auto justify-center"
             >
               <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 011.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
