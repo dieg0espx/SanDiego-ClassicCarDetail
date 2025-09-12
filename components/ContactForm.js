@@ -147,7 +147,7 @@ export default function ContactForm() {
         )}
 
         {submitStatus === 'error' && (
-          <div className="bg-gold border border-gold text-gold px-4 py-3 rounded-lg">
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
             There was an error sending your message. Please try again or call us directly.
           </div>
         )}
@@ -155,7 +155,7 @@ export default function ContactForm() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-gold hover:bg-gold disabled:bg-gray-400 text-white font-bold py-3 sm:py-4 px-4 sm:px-6 rounded-lg transition-colors duration-200 flex items-center justify-center text-sm sm:text-base"
+          className="w-full bg-gold hover:bg-gold/90 disabled:bg-gray-400 text-white font-bold py-3 sm:py-4 px-4 sm:px-6 rounded-lg transition-colors duration-200 flex items-center justify-center text-sm sm:text-base"
         >
           {isSubmitting ? (
             <>

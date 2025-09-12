@@ -80,7 +80,7 @@ export default function AddOnServicesCarousel() {
               {/* Icon Section */}
               <div className="flex justify-center mb-6">
                 <div className="w-16 h-16 bg-gradient-to-br from-gold to-gold rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <svg className="w-8 h-8 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={service.icon} />
                   </svg>
                 </div>
@@ -97,7 +97,7 @@ export default function AddOnServicesCarousel() {
                     {service.price}
                   </div>
                   {!service.price.includes('Quote') && (
-                    <div className="text-sm text-gray-400 mt-1">Additional fee</div>
+                    <div className="text-sm text-gray-600 mt-1">Additional fee</div>
                   )}
                 </div>
                 
@@ -108,7 +108,7 @@ export default function AddOnServicesCarousel() {
               
               {/* Decorative Element */}
               <div className="mt-6 flex justify-center">
-                <div className="w-12 h-1 bg-gold rounded-full group-hover:bg-gold transition-colors duration-300"></div>
+                <div className="w-12 h-1 bg-gold rounded-full group-hover:bg-gold/80 transition-colors duration-300"></div>
               </div>
             </div>
           </div>

@@ -5,7 +5,7 @@ export default function CallToAction() {
         <h2 className="text-3xl font-bold text-white sm:text-4xl">
           Ready to Schedule Your Detail?
         </h2>
-        <p className="mt-4 text-xl text-gold">
+        <p className="mt-4 text-xl text-white/90">
           Call us today for a personalized quote
         </p>
         <div className="mt-8">

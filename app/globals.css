@@ -27,3 +27,71 @@
 .animate-scroll-right {
   animation: scroll-right 30s linear infinite;
 }
+
+/* Pricing Slider Styles */
+.pricing-slider {
+  position: relative;
+}
+
+.pricing-slider .slick-prev,
+.pricing-slider .slick-next {
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.pricing-slider .slick-prev:hover,
+.pricing-slider .slick-next:hover {
+  background: rgba(255, 255, 255, 1);
+}
+
+.pricing-slider .slick-prev {
+  left: -50px;
+}
+
+.pricing-slider .slick-next {
+  right: -50px;
+}
+
+.pricing-slider .slick-prev:before,
+.pricing-slider .slick-next:before {
+  font-size: 20px;
+  color: #D4AF37;
+  opacity: 1;
+}
+
+.pricing-slider .slick-dots {
+  bottom: -50px;
+}
+
+.pricing-slider .slick-dots li button:before {
+  font-size: 12px;
+  color: #D4AF37;
+  opacity: 0.5;
+}
+
+.pricing-slider .slick-dots li.slick-active button:before {
+  color: #D4AF37;
+  opacity: 1;
+}
+
+/* Ensure slider container has proper height */
+.pricing-slider .slick-slider {
+  height: auto;
+}
+
+.pricing-slider .slick-track {
+  display: flex;
+  align-items: stretch;
+}
+
+.pricing-slider .slick-slide {
+  height: auto;
+}
+
+.pricing-slider .slick-slide > div {
+  height: 100%;
+}

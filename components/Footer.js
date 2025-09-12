@@ -105,7 +105,7 @@ export default function Footer() {
                 </div>
                 <div>
                   <p className="font-semibold text-white">Call Now</p>
-                  <a href="tel:7605188451" className="text-gold hover:text-gold transition-colors font-medium">(760) 518-8451</a>
+                  <a href="tel:7605188451" className="text-gold hover:text-white transition-colors font-medium">(760) 518-8451</a>
                 </div>
               </div>
               
@@ -130,7 +130,7 @@ export default function Footer() {
                 </div>
                 <div>
                   <p className="font-semibold text-white">Email</p>
-                  <a href="mailto:SDclassicautodetail@outlook.com" className="text-gold hover:text-gold transition-colors break-all">SDclassicautodetail@outlook.com</a>
+                  <a href="mailto:SDclassicautodetail@outlook.com" className="text-gold hover:text-white transition-colors break-all">SDclassicautodetail@outlook.com</a>
                 </div>
               </div>
             </div>

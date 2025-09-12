@@ -55,7 +55,7 @@ export default function AboutUs() {
             San Diego Classic Auto Detail
           </h2>
           <div className="w-20 h-1 bg-gold mx-auto mb-6"></div>
-          <p className="text-lg text-gray-400 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
             Your trusted partner in automotive excellence, bringing over a decade of passion and expertise to every vehicle we touch.
           </p>
         </div>

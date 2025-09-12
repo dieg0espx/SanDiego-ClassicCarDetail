@@ -162,7 +162,7 @@ export default function Testimonials() {
           </p>
           <a
             href="tel:(760) 518-8451"
-            className="bg-gold hover:bg-gold text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-semibold transition-colors shadow-lg inline-block"
+            className="bg-gold hover:bg-gold/90 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-semibold transition-colors shadow-lg inline-block"
           >
             Get Your Quote Today
           </a>
