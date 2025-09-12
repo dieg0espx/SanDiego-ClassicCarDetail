@@ -184,10 +184,10 @@ export default function Packages() {
               Add-on Services
             </h2>
             <p className="mt-4 text-lg text-gray-500">
-              Additional fees may apply based on vehicle condition
+              Enhance your service with premium add-ons
             </p>
-            <p className="mt-2 text-sm text-gray-400">
-              (Accurate quote provided after inspection)
+            <p className="mt-2 text-sm text-gray-600">
+              Prices are base rates for vehicles in average condition. Oversize vehicles may incur a small surcharge. Final quotes provided on site before service begins.
             </p>
           </div>
 

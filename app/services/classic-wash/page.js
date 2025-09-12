@@ -19,6 +19,9 @@ export default function ClassicWash() {
               Perfect for a quick, refreshing clean that gets your vehicle looking great
             </p>
             <div className="mt-6 text-3xl font-bold text-gold">$170</div>
+            <p className="mt-3 text-sm text-gray-400">
+              Prices are base rates for vehicles in average condition. Oversize vehicles may incur a small surcharge.
+            </p>
           </div>
         </div>
       </section>

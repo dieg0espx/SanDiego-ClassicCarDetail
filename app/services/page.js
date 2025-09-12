@@ -175,6 +175,15 @@ export default function Services() {
               </div>
             </div>
           </div>
+          
+          {/* Pricing Disclaimer */}
+          <div className="max-w-4xl mx-auto mt-12">
+            <div className="bg-gray-100 rounded-xl border border-gray-200 p-6 text-center">
+              <p className="text-sm text-gray-600">
+                Prices are base rates for vehicles in average condition. Oversize vehicles may incur a small surcharge. Final quotes provided on site before service begins.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
