@@ -2,8 +2,30 @@ import Header from '../../../components/Header'
 import Footer from '../../../components/Footer'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useCart } from '../../../contexts/CartContext'
 
 export default function HotRodDetail() {
+  const { addItem } = useCart()
+
+  const serviceData = {
+    id: 'hot-rod-detail',
+    name: 'The Hot Rod Detail',
+    description: 'Show-quality detailing inspired by classic hot rods - for when you want your ride to turn heads.',
+    price: 270,
+    image: '/stock/3.png',
+    duration: '2-3 hours',
+    features: [
+      'Three-step wash & wax',
+      'Full interior shampoo',
+      'Leather reconditioning'
+    ]
+  }
+
+  const handleAddToCart = () => {
+    addItem(serviceData)
+    alert('Service added to cart! You can review your order in the cart.')
+  }
+
   return (
     <div className="min-h-screen bg-white">
     
@@ -48,10 +70,16 @@ export default function HotRodDetail() {
                 three-step washing, full interior shampoo, and leather reconditioning.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <a href="tel:(760) 518-8451" className="bg-gold hover:bg-gold text-white px-8 py-3 rounded-lg font-semibold transition-colors text-center">
-                  Book Now - (760) 518-8451
+                <button 
+                  onClick={handleAddToCart}
+                  className="bg-gold hover:bg-gold text-white px-8 py-3 rounded-lg font-semibold transition-colors text-center"
+                >
+                  Add to Cart - $270
+                </button>
+                <a href="tel:(760) 518-8451" className="bg-gray-600 hover:bg-gray-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors text-center">
+                  Call (760) 518-8451
                 </a>
-                <Link href="/services" className="bg-gray-600 hover:bg-gray-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors text-center">
+                <Link href="/services" className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-gold px-8 py-3 rounded-lg font-semibold transition-colors text-center">
                   View All Services
                 </Link>
               </div>
@@ -383,7 +411,13 @@ export default function HotRodDetail() {
             Your vehicle deserves the best.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="tel:(760) 518-8451" className="bg-gold hover:bg-gold text-white font-bold px-8 py-3 rounded-lg transition-colors">
+            <button 
+              onClick={handleAddToCart}
+              className="bg-gold hover:bg-gold text-white font-bold px-8 py-3 rounded-lg transition-colors"
+            >
+              Add to Cart - $270
+            </button>
+            <a href="tel:(760) 518-8451" className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-gold font-bold px-8 py-3 rounded-lg transition-colors">
               Call (760) 518-8451
             </a>
             <Link href="/services" className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-gold font-bold px-8 py-3 rounded-lg transition-colors">

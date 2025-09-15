@@ -2,6 +2,8 @@
 import { useAuth } from '../../contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { supabase } from '../../lib/supabase'
+import { FiUsers } from "react-icons/fi"
 
 export default function AdminDashboard() {
   const { user, loading } = useAuth()
@@ -11,6 +13,37 @@ export default function AdminDashboard() {
   const [currentDate, setCurrentDate] = useState(new Date(2025, 8, 1)) // September 2025
   const [selectedDate, setSelectedDate] = useState(null)
   const [showAppointmentModal, setShowAppointmentModal] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [editingOrder, setEditingOrder] = useState(null)
+  const [editNotes, setEditNotes] = useState('')
+  const [orders, setOrders] = useState([])
+  const [ordersLoading, setOrdersLoading] = useState(false)
+  const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const [orderToComplete, setOrderToComplete] = useState(null)
+  const [showUserModal, setShowUserModal] = useState(false)
+  const [selectedUser, setSelectedUser] = useState(null)
+
+  // Fetch orders from Supabase
+  const fetchOrders = async () => {
+    setOrdersLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        console.error('Error fetching orders:', error)
+        return
+      }
+
+      setOrders(data || [])
+    } catch (error) {
+      console.error('Error fetching orders:', error)
+    } finally {
+      setOrdersLoading(false)
+    }
+  }
 
   useEffect(() => {
     if (!loading && !user) {
@@ -20,6 +53,7 @@ export default function AdminDashboard() {
       const adminEmail = 'aletxa.pascual@gmail.com'
       if (user.email === adminEmail) {
         setIsAdmin(true)
+        fetchOrders() // Fetch orders when admin loads
       } else {
         router.push('/dashboard')
       }
@@ -38,7 +72,15 @@ export default function AdminDashboard() {
   }
 
   if (!user || !isAdmin) {
-    return null
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
+          <p className="text-gray-600">You don't have permission to access this page.</p>
+          <p className="text-sm text-gray-500 mt-2">Debug: isAdmin = {isAdmin.toString()}, user = {user?.email || 'null'}</p>
+        </div>
+      </div>
+    )
   }
 
   const getUserDisplayName = () => {
@@ -46,6 +88,77 @@ export default function AdminDashboard() {
       return `${user.user_metadata.first_name} ${user.user_metadata.last_name}`
     }
     return user?.email || 'Admin'
+  }
+
+  // Helper functions to calculate real statistics from orders
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(price)
+  }
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return 'N/A'
+    return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric'
+    })
+  }
+
+  const formatTime = (timeStr) => {
+    if (!timeStr) return 'N/A'
+    const hour = parseInt(timeStr.split(':')[0])
+    return hour === 12 ? '12:00 PM' :
+           hour > 12 ? `${hour - 12}:00 PM` :
+           `${hour}:00 AM`
+  }
+
+
+  const formatStatus = (status) => {
+    return status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ')
+  }
+
+  // Helper functions to get all users (from orders only)
+  const getUniqueUsers = () => {
+    const userMap = new Map()
+    
+    // Add users from orders
+    orders.forEach(order => {
+      if (order.user_id && order.customer_info) {
+        if (!userMap.has(order.user_id)) {
+          userMap.set(order.user_id, {
+            id: order.user_id,
+            first_name: order.customer_info.firstName || 'Unknown',
+            last_name: order.customer_info.lastName || 'User',
+            email: order.customer_info.email || 'No email',
+            phone: order.customer_info.phone || 'No phone',
+            created_at: order.created_at,
+            order_count: 0,
+            total_spent: 0,
+            recent_orders: []
+          })
+        }
+        const user = userMap.get(order.user_id)
+        user.order_count++
+        user.total_spent += order.total || 0
+        user.recent_orders.push(order)
+      }
+    })
+    
+    // Sort recent orders by date (newest first) and limit to 10
+    userMap.forEach(user => {
+      user.recent_orders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+      user.recent_orders = user.recent_orders.slice(0, 10)
+    })
+    
+    const users = Array.from(userMap.values()).sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    return users
+  }
+
+  const getUsersCount = () => {
+    return getUniqueUsers().length
   }
 
   // Mock data for admin dashboard
@@ -443,13 +556,39 @@ export default function AdminDashboard() {
     return new Date(date.getFullYear(), date.getMonth(), 1).getDay()
   }
 
-  const formatDate = (date) => {
-    return date.toISOString().split('T')[0]
-  }
 
   const getAppointmentsForDate = (date) => {
-    const dateStr = formatDate(date)
-    return mockData.appointments.filter(appointment => appointment.date === dateStr)
+    const dateStr = date.toISOString().split('T')[0]
+    return orders
+      .filter(order => 
+        order.scheduled_date === dateStr && 
+        order.scheduled_time &&
+        order.status !== 'cancelled'
+      )
+      .map(order => ({
+        id: order.id,
+        customer: `${order.customer_info?.firstName || ''} ${order.customer_info?.lastName || ''}`.trim() || 'Unknown Customer',
+        service: order.items?.[0]?.name || 'Service',
+        time: formatTime(order.scheduled_time),
+        amount: order.total || 0,
+        phone: order.customer_info?.phone || 'No phone',
+        email: order.customer_info?.email || 'No email',
+        notes: order.notes || 'No notes',
+        status: order.status || 'pending',
+        location: order.location?.fullAddress || 'No address',
+        serviceArea: order.location?.serviceAreaName || '',
+        scheduled_time: order.scheduled_time // Keep original time for sorting
+      }))
+      .sort((a, b) => {
+        // Sort by scheduled_time (HH:MM format)
+        if (a.scheduled_time && b.scheduled_time) {
+          return a.scheduled_time.localeCompare(b.scheduled_time)
+        }
+        // If one doesn't have time, put it at the end
+        if (a.scheduled_time && !b.scheduled_time) return -1
+        if (!a.scheduled_time && b.scheduled_time) return 1
+        return 0
+      })
   }
 
   const navigateMonth = (direction) => {
@@ -468,11 +607,122 @@ export default function AdminDashboard() {
     }
   }
 
+  const handleEditAppointment = (appointment) => {
+    setEditingOrder(appointment)
+    setEditNotes(appointment.notes || '')
+    setShowEditModal(true)
+  }
+
+  const handleSaveNotes = async () => {
+    if (!editingOrder) return
+
+    try {
+      console.log('Updating notes for order:', editingOrder.id)
+      console.log('Notes to save:', editNotes)
+      
+      const { data, error } = await supabase
+        .from('orders')
+        .update({ 
+          notes: editNotes
+        })
+        .eq('id', editingOrder.id)
+        .select()
+
+      if (error) {
+        console.error('Error updating notes:', error)
+        console.error('Full error details:', error)
+        alert(`Failed to update notes: ${error.message}`)
+        return
+      }
+
+      console.log('Successfully updated notes:', data)
+
+      // Update local state
+      setOrders(prevOrders => 
+        prevOrders.map(order => 
+          order.id === editingOrder.id 
+            ? { ...order, notes: editNotes }
+            : order
+        )
+      )
+
+      setShowEditModal(false)
+      setEditingOrder(null)
+      setEditNotes('')
+    } catch (error) {
+      console.error('Error updating notes:', error)
+      alert('Failed to update notes. Please try again.')
+    }
+  }
+
+  const handleMarkCompleteClick = (order) => {
+    setOrderToComplete(order)
+    setShowConfirmModal(true)
+  }
+
+  const handleConfirmComplete = async () => {
+    if (!orderToComplete) return
+
+    try {
+      console.log('Updating status for order:', orderToComplete.id, 'to: completed')
+      
+      const { data, error } = await supabase
+        .from('orders')
+        .update({ 
+          status: 'completed',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', orderToComplete.id)
+        .select()
+
+      if (error) {
+        console.error('Error updating status:', error)
+        alert(`Failed to update status: ${error.message}`)
+        return
+      }
+
+      console.log('Successfully updated status:', data)
+
+      // Update local state
+      setOrders(prevOrders => 
+        prevOrders.map(order => 
+          order.id === orderToComplete.id 
+            ? { ...order, status: 'completed' }
+            : order
+        )
+      )
+
+      alert(`Order #${orderToComplete.id.slice(-8)} has been marked as completed!`)
+      
+      // Close modal and reset state
+      setShowConfirmModal(false)
+      setOrderToComplete(null)
+    } catch (error) {
+      console.error('Error updating status:', error)
+      alert('Failed to update status. Please try again.')
+    }
+  }
+
+  const handleCancelComplete = () => {
+    setShowConfirmModal(false)
+    setOrderToComplete(null)
+  }
+
+  const handleViewUser = (user) => {
+    setSelectedUser(user)
+    setShowUserModal(true)
+  }
+
+  const handleCloseUserModal = () => {
+    setShowUserModal(false)
+    setSelectedUser(null)
+  }
+
   const tabs = [
     { id: 'overview', label: 'Overview', icon: 'M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z' },
+    { id: 'orders', label: 'Services', icon: 'M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' },
     { id: 'calendar', label: 'Calendar', icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' },
     { id: 'users', label: 'Users', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z' },
-    { id: 'services', label: 'Services', icon: 'M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' },
     { id: 'analytics', label: 'Analytics', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' }
   ]
 
@@ -495,6 +745,151 @@ export default function AdminDashboard() {
     return status.charAt(0).toUpperCase() + status.slice(1)
   }
 
+  // Analytics functions
+  const getServicePopularity = () => {
+    const serviceCounts = {}
+    let totalServices = 0
+
+    orders.forEach(order => {
+      if (order.items && order.items.length > 0) {
+        order.items.forEach(item => {
+          const serviceName = item.name
+          serviceCounts[serviceName] = (serviceCounts[serviceName] || 0) + item.quantity
+          totalServices += item.quantity
+        })
+      }
+    })
+
+    return Object.entries(serviceCounts)
+      .map(([service, count]) => ({
+        name: service,
+        count,
+        percentage: totalServices > 0 ? Math.round((count / totalServices) * 100) : 0
+      }))
+      .sort((a, b) => b.count - a.count)
+  }
+
+  const getMonthlyRevenue = () => {
+    const monthlyData = {}
+    
+    orders.forEach(order => {
+      if (order.created_at && order.total) {
+        const date = new Date(order.created_at)
+        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+        const monthName = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+        
+        if (!monthlyData[monthKey]) {
+          monthlyData[monthKey] = {
+            month: monthName,
+            revenue: 0,
+            orders: 0
+          }
+        }
+        
+        monthlyData[monthKey].revenue += order.total
+        monthlyData[monthKey].orders += 1
+      }
+    })
+
+    const realData = Object.values(monthlyData)
+      .sort((a, b) => b.month.localeCompare(a.month))
+      .slice(0, 6) // Show last 6 months
+
+    // If no real data, return sample data for demonstration
+    if (realData.length === 0) {
+      const currentDate = new Date()
+      return [
+        {
+          month: currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+          revenue: 2500,
+          orders: 12
+        },
+        {
+          month: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+          revenue: 3200,
+          orders: 15
+        },
+        {
+          month: new Date(currentDate.getFullYear(), currentDate.getMonth() - 2).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+          revenue: 1800,
+          orders: 8
+        },
+        {
+          month: new Date(currentDate.getFullYear(), currentDate.getMonth() - 3).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+          revenue: 4100,
+          orders: 18
+        }
+      ]
+    }
+
+    return realData
+  }
+
+  const generatePieChart = (data) => {
+    if (!data || data.length === 0) return null
+
+    const totalRevenue = data.reduce((sum, month) => sum + month.revenue, 0)
+    if (totalRevenue === 0) return null
+
+    let cumulativePercentage = 0
+    const colors = [
+      '#AF945B', // Gold
+      '#3B82F6', // Blue
+      '#10B981', // Green
+      '#F59E0B', // Amber
+      '#EF4444', // Red
+      '#8B5CF6'  // Purple
+    ]
+
+    return data.map((month, index) => {
+      const percentage = (month.revenue / totalRevenue) * 100
+      const startAngle = (cumulativePercentage / 100) * 360
+      const endAngle = ((cumulativePercentage + percentage) / 100) * 360
+      
+      cumulativePercentage += percentage
+
+      return {
+        ...month,
+        percentage: Math.round(percentage * 10) / 10,
+        startAngle,
+        endAngle,
+        color: colors[index % colors.length]
+      }
+    })
+  }
+
+  const getStatusDistribution = () => {
+    const statusCounts = {}
+    
+    orders.forEach(order => {
+      const status = order.status || 'unknown'
+      statusCounts[status] = (statusCounts[status] || 0) + 1
+    })
+
+    return Object.entries(statusCounts)
+      .map(([status, count]) => ({
+        status: formatStatus(status),
+        count,
+        percentage: orders.length > 0 ? Math.round((count / orders.length) * 100) : 0
+      }))
+      .sort((a, b) => b.count - a.count)
+  }
+
+  const getRecentActivity = () => {
+    return orders
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+      .slice(0, 10)
+      .map(order => ({
+        id: order.id,
+        customer: `${order.customer_info?.firstName || ''} ${order.customer_info?.lastName || ''}`.trim() || 'Unknown',
+        service: order.items?.[0]?.name || 'Service',
+        amount: order.total || 0,
+        status: order.status || 'pending',
+        date: new Date(order.created_at).toLocaleDateString(),
+        time: new Date(order.created_at).toLocaleTimeString()
+      }))
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -515,18 +910,19 @@ export default function AdminDashboard() {
           </div>
         </div>
 
+
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center">
               <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                </svg>
+                <FiUsers className="w-6 h-6 text-gray-600" />
               </div>
               <div className="ml-4">
-                <div className="text-2xl font-bold text-gray-900">{mockData.totalUsers}</div>
-                <div className="text-sm text-gray-500">Total Users</div>
+                <div className="text-2xl font-bold text-gray-900">{getUsersCount()}</div>
+                <div className="text-sm text-gray-500">
+                  {getUsersCount() === 0 ? 'No users yet' : 'Total Users'}
+                </div>
               </div>
             </div>
           </div>
@@ -539,7 +935,7 @@ export default function AdminDashboard() {
                 </svg>
               </div>
               <div className="ml-4">
-                <div className="text-2xl font-bold text-gray-900">{mockData.totalServices}</div>
+                <div className="text-2xl font-bold text-gray-900">{orders.length}</div>
                 <div className="text-sm text-gray-500">Total Services</div>
               </div>
             </div>
@@ -553,7 +949,7 @@ export default function AdminDashboard() {
                 </svg>
               </div>
               <div className="ml-4">
-                <div className="text-2xl font-bold text-gray-900">${mockData.totalRevenue.toLocaleString()}</div>
+                <div className="text-2xl font-bold text-gray-900">{formatPrice(orders.reduce((total, order) => total + (order.total || 0), 0))}</div>
                 <div className="text-sm text-gray-500">Total Revenue</div>
               </div>
             </div>
@@ -567,8 +963,8 @@ export default function AdminDashboard() {
                 </svg>
               </div>
               <div className="ml-4">
-                <div className="text-2xl font-bold text-gray-900">{mockData.pendingAppointments}</div>
-                <div className="text-sm text-gray-500">Pending</div>
+                <div className="text-2xl font-bold text-gray-900">{orders.filter(order => order.status === 'pending' && order.scheduled_date).length}</div>
+                <div className="text-sm text-gray-500">Pending Appointments</div>
               </div>
             </div>
           </div>
@@ -607,18 +1003,35 @@ export default function AdminDashboard() {
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Users</h3>
                     <div className="bg-gray-50 rounded-lg p-4">
                       <div className="space-y-4">
-                        {mockData.recentUsers.map((user) => (
-                          <div key={user.id} className="flex items-center justify-between">
-                            <div>
-                              <h4 className="font-medium text-gray-900">{user.name}</h4>
-                              <p className="text-sm text-gray-500">{user.email}</p>
+                        {getUniqueUsers().length > 0 ? (
+                          getUniqueUsers().slice(0, 3).map((user) => (
+                            <div key={user.id} className="flex items-center justify-between">
+                              <div>
+                                <h4 className="font-medium text-gray-900">
+                                  {user.first_name} {user.last_name}
+                                </h4>
+                                <p className="text-sm text-gray-500">{user.email}</p>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-sm font-medium text-gray-900">
+                                  {user.order_count} orders
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  {new Date(user.created_at).toLocaleDateString()}
+                                </div>
+                              </div>
                             </div>
-                            <div className="text-right">
-                              <div className="text-sm font-medium text-gray-900">{user.services} services</div>
-                              <div className="text-xs text-gray-500">{user.joinDate}</div>
+                          ))
+                        ) : (
+                          <div className="text-center py-8">
+                            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                              <FiUsers className="w-8 h-8 text-gray-400" />
                             </div>
+                            <h3 className="text-lg font-semibold text-gray-900 mb-2">No Users Yet</h3>
+                            <p className="text-gray-500 mb-4">Users will appear here once customers start placing orders.</p>
+                            <p className="text-sm text-gray-400">The admin dashboard will show real-time data as your business grows.</p>
                           </div>
-                        ))}
+                        )}
                       </div>
                     </div>
                   </div>
@@ -628,16 +1041,18 @@ export default function AdminDashboard() {
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Services</h3>
                     <div className="bg-gray-50 rounded-lg p-4">
                       <div className="space-y-4">
-                        {mockData.recentServices.map((service) => (
-                          <div key={service.id} className="flex items-center justify-between">
+                        {orders.filter(order => order.scheduled_date).slice(0, 3).map((order) => (
+                          <div key={order.id} className="flex items-center justify-between">
                             <div>
-                              <h4 className="font-medium text-gray-900">{service.customer}</h4>
-                              <p className="text-sm text-gray-500">{service.service}</p>
+                              <h4 className="font-medium text-gray-900">
+                                {order.customer_info?.firstName} {order.customer_info?.lastName}
+                              </h4>
+                              <p className="text-sm text-gray-500">{order.items?.[0]?.name || 'Service'}</p>
                             </div>
                             <div className="text-right">
-                              <div className="text-sm font-medium text-gray-900">${service.amount}</div>
-                              <div className={getStatusBadgeClasses(service.status)}>
-                                {capitalizeStatus(service.status)}
+                              <div className="text-sm font-medium text-gray-900">{formatPrice(order.total)}</div>
+                              <div className={getStatusBadgeClasses(order.status)}>
+                                {formatStatus(order.status)}
                               </div>
                             </div>
                           </div>
@@ -646,6 +1061,114 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                 </div>
+              </div>
+            )}
+
+            {/* Orders Tab */}
+            {activeTab === 'orders' && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-bold text-gray-900">Services</h2>
+                  <button
+                    onClick={fetchOrders}
+                    disabled={ordersLoading}
+                    className="bg-gold hover:bg-gold text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
+                  >
+                    {ordersLoading ? 'Loading...' : 'Refresh'}
+                  </button>
+                </div>
+
+                {ordersLoading ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gold mx-auto"></div>
+                    <p className="mt-2 text-gray-600">Loading orders...</p>
+                  </div>
+                ) : orders.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500">No orders found. Orders will appear here when customers complete checkout.</p>
+                  </div>
+                ) : (
+                  <div className="bg-white shadow-sm rounded-lg overflow-hidden">
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Items</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {orders.map((order) => (
+                            <tr key={order.id} className="hover:bg-gray-50">
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                #{order.id.slice(-8)}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <div>
+                                  <div className="font-medium">{order.customer_info?.firstName} {order.customer_info?.lastName}</div>
+                                  <div className="text-gray-500">{order.customer_info?.email}</div>
+                                  <div className="text-gray-500">{order.customer_info?.phone}</div>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 text-sm text-gray-900">
+                                <div>
+                                  <div className="font-medium">{order.location?.fullAddress}</div>
+                                  {order.location?.serviceAreaCost > 0 && (
+                                    <div className="text-gold text-xs">+${order.location.serviceAreaCost} {order.location.serviceAreaName}</div>
+                                  )}
+                                  {order.location?.serviceAreaCost === 0 && order.location?.serviceAreaName && (
+                                    <div className="text-green-600 text-xs">FREE - {order.location.serviceAreaName}</div>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 text-sm text-gray-900">
+                                <div className="space-y-1">
+                                  {order.items?.map((item, index) => (
+                                    <div key={index} className="flex justify-between">
+                                      <span>{item.name}</span>
+                                      <span className="text-gray-500">x{item.quantity}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                ${order.total?.toFixed(2)}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {new Date(order.created_at).toLocaleDateString()}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {order.status !== 'completed' && order.status !== 'cancelled' && (
+                                  <button
+                                    onClick={() => handleMarkCompleteClick(order)}
+                                    className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-md text-xs font-medium transition-colors"
+                                  >
+                                    Mark Complete
+                                  </button>
+                                )}
+                                {order.status === 'completed' && (
+                                  <span className="text-green-600 text-xs font-medium">
+                                    ✓ Completed
+                                  </span>
+                                )}
+                                {order.status === 'cancelled' && (
+                                  <span className="text-red-600 text-xs font-medium">
+                                    ✗ Cancelled
+                                  </span>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -713,10 +1236,13 @@ export default function AdminDashboard() {
                                 <div
                                   key={appointment.id}
                                   className="text-xs bg-gold text-white px-2 py-1 rounded w-full"
-                                  title={`${appointment.customer} - ${appointment.service}`}
+                                  title={`${appointment.customer} - ${appointment.service} - ${appointment.location}`}
                                 >
                                   <div className="truncate">
                                     {appointment.time} {appointment.customer}
+                                  </div>
+                                  <div className="truncate text-xs opacity-90">
+                                    {appointment.location}
                                   </div>
                                 </div>
                               ))}
@@ -758,133 +1284,227 @@ export default function AdminDashboard() {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {mockData.recentUsers.map((user) => (
-                        <tr key={user.id}>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="font-medium text-gray-900">{user.name}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-gray-900">{user.email}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-gray-900">{user.phone}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-gray-900">{user.services}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-gray-900">{user.joinDate}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <button className="text-gold hover:text-gold mr-4">View</button>
-                            <button className="text-gray-600 hover:text-gray-800">Edit</button>
+                      {getUniqueUsers().length > 0 ? (
+                        getUniqueUsers().map((user) => (
+                          <tr key={user.id}>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="font-medium text-gray-900">
+                                {user.first_name} {user.last_name}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-gray-900">{user.email}</div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-gray-900">{user.phone || 'N/A'}</div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-gray-900">
+                                {user.order_count}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-gray-900">
+                                {new Date(user.created_at).toLocaleDateString()}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                              <button 
+                                onClick={() => handleViewUser(user)}
+                                className="text-gold hover:text-gold transition-colors"
+                              >
+                                View
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="6" className="px-6 py-12 text-center">
+                            <div className="flex flex-col items-center">
+                              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                <FiUsers className="w-6 h-6 text-gray-400" />
+                              </div>
+                              <h3 className="text-lg font-semibold text-gray-900 mb-2">No Users Yet</h3>
+                              <p className="text-gray-500 mb-2">Users will appear here once customers start placing orders.</p>
+                              <p className="text-sm text-gray-400">The admin dashboard will show real-time data as your business grows.</p>
+                            </div>
                           </td>
                         </tr>
-                      ))}
+                      )}
                     </tbody>
                   </table>
                 </div>
               </div>
             )}
 
-            {/* Services Tab */}
-            {activeTab === 'services' && (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-900">Service Management</h3>
-                  <div className="flex space-x-3">
-                    <button className="bg-gold hover:bg-gold text-white font-medium px-4 py-2 rounded-lg transition-colors">
-                      Add Service
-                    </button>
-                    <button className="border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium px-4 py-2 rounded-lg transition-colors">
-                      Export Data
-                    </button>
-                  </div>
-                </div>
-
-                <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {mockData.recentServices.map((service) => (
-                        <tr key={service.id}>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="font-medium text-gray-900">{service.customer}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-gray-900">{service.service}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-gray-900">{service.date}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-gray-900">${service.amount}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={getStatusBadgeClasses(service.status)}>
-                              {capitalizeStatus(service.status)}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <button className="text-gold hover:text-gold mr-4">View</button>
-                            <button className="text-gray-600 hover:text-gray-800">Edit</button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
 
             {/* Analytics Tab */}
             {activeTab === 'analytics' && (
               <div className="space-y-6">
-                <h3 className="text-lg font-semibold text-gray-900">Analytics & Reports</h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-gray-900">Analytics & Reports</h3>
+                  <div className="text-sm text-gray-500">
+                    Last updated: {new Date().toLocaleString()}
+                  </div>
+                </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="bg-gray-50 rounded-lg p-6">
+
+                {/* Charts and Analytics */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Service Popularity */}
+                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                     <h4 className="font-semibold text-gray-900 mb-4">Service Popularity</h4>
-                    <div className="space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">The Sunset Shine</span>
-                        <span className="font-medium">45%</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">The Classic Wash</span>
-                        <span className="font-medium">35%</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">The Hot Rod Detail</span>
-                        <span className="font-medium">20%</span>
-                      </div>
+                    <div className="space-y-4">
+                      {getServicePopularity().length > 0 ? (
+                        getServicePopularity().map((service, index) => (
+                          <div key={service.name} className="space-y-2">
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm font-medium text-gray-700">{service.name}</span>
+                              <span className="text-sm font-bold text-gray-900">{service.percentage}%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div 
+                                className="bg-gold h-2 rounded-full transition-all duration-300"
+                                style={{ width: `${service.percentage}%` }}
+                              ></div>
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {service.count} order{service.count !== 1 ? 's' : ''}
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-center py-8 text-gray-500">
+                          <p>No service data available</p>
+                        </div>
+                      )}
                     </div>
                   </div>
 
-                  <div className="bg-gray-50 rounded-lg p-6">
+                  {/* Monthly Revenue */}
+                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                     <h4 className="font-semibold text-gray-900 mb-4">Monthly Revenue</h4>
+                    {(() => {
+                      const monthlyData = getMonthlyRevenue()
+                      
+                      if (monthlyData.length > 0) {
+                        const maxRevenue = Math.max(...monthlyData.map(m => m.revenue))
+                        
+                        return (
+                          <div className="space-y-4">
+                            {/* Bar Chart */}
+                            <div className="space-y-4">
+                              {monthlyData.map((month, index) => {
+                                const percentage = maxRevenue > 0 ? (month.revenue / maxRevenue) * 100 : 0
+                                const colors = ['bg-gold', 'bg-blue-500', 'bg-green-500', 'bg-amber-500', 'bg-red-500', 'bg-purple-500']
+                                const colorClass = colors[index % colors.length]
+                                
+                                return (
+                                  <div key={index} className="space-y-2">
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-sm font-medium text-gray-700">{month.month}</span>
+                                      <div className="text-right">
+                                        <span className="text-sm font-bold text-gray-900">{formatPrice(month.revenue)}</span>
+                                        <div className="text-xs text-gray-500">{month.orders} orders</div>
+                                      </div>
+                                    </div>
+                                    <div className="w-full bg-gray-200 rounded-full h-3">
+                                      <div 
+                                        className={`${colorClass} h-3 rounded-full transition-all duration-500 ease-out`}
+                                        style={{ 
+                                          width: `${percentage}%`,
+                                          animationDelay: `${index * 100}ms`
+                                        }}
+                                      ></div>
+                                    </div>
+                                  </div>
+                                )
+                              })}
+                            </div>
+                            
+                            {/* Summary Stats */}
+                            <div className="mt-6 pt-4 border-t border-gray-200">
+                              <div className="grid grid-cols-2 gap-4">
+                                <div className="text-center">
+                                  <div className="text-2xl font-bold text-gold">
+                                    {formatPrice(monthlyData.reduce((sum, month) => sum + month.revenue, 0))}
+                                  </div>
+                                  <div className="text-sm text-gray-500">Total Revenue</div>
+                                </div>
+                                <div className="text-center">
+                                  <div className="text-2xl font-bold text-gold">
+                                    {monthlyData.reduce((sum, month) => sum + month.orders, 0)}
+                                  </div>
+                                  <div className="text-sm text-gray-500">Total Orders</div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      } else {
+                        return (
+                          <div className="text-center py-8 text-gray-500">
+                            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                              </svg>
+                            </div>
+                            <p className="text-lg font-medium text-gray-900 mb-2">No Revenue Data</p>
+                            <p className="text-sm text-gray-500">Revenue data will appear here once customers start placing orders.</p>
+                          </div>
+                        )
+                      }
+                    })()}
+                  </div>
+                </div>
+
+                {/* Status Distribution and Recent Activity */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Status Distribution */}
+                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <h4 className="font-semibold text-gray-900 mb-4">Order Status Distribution</h4>
                     <div className="space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">January 2024</span>
-                        <span className="font-medium">$18,400</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">December 2023</span>
-                        <span className="font-medium">$22,100</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">November 2023</span>
-                        <span className="font-medium">$19,800</span>
-                      </div>
+                      {getStatusDistribution().map((status) => (
+                        <div key={status.status} className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div className={`w-3 h-3 rounded-full ${getStatusColor(status.status.toLowerCase().replace(' ', '_'))}`}></div>
+                            <span className="text-sm text-gray-700">{status.status}</span>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-sm font-bold text-gray-900">{status.count}</div>
+                            <div className="text-xs text-gray-500">{status.percentage}%</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Recent Activity */}
+                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <h4 className="font-semibold text-gray-900 mb-4">Recent Activity</h4>
+                    <div className="space-y-3 max-h-64 overflow-y-auto">
+                      {getRecentActivity().length > 0 ? (
+                        getRecentActivity().map((activity) => (
+                          <div key={activity.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                            <div className="flex-1">
+                              <div className="text-sm font-medium text-gray-900">{activity.customer}</div>
+                              <div className="text-xs text-gray-500">{activity.service}</div>
+                              <div className="text-xs text-gray-400">{activity.date} at {activity.time}</div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-sm font-bold text-gray-900">{formatPrice(activity.amount)}</div>
+                              <span className={`inline-flex px-2 py-0.5 text-xs font-semibold rounded-full ${getStatusColor(activity.status)}`}>
+                                {formatStatus(activity.status)}
+                              </span>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-center py-8 text-gray-500">
+                          <p>No recent activity</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -950,25 +1570,48 @@ export default function AdminDashboard() {
                           <span className="font-medium text-gray-700">Phone:</span>
                           <span className="ml-2 text-gray-900">{appointment.phone}</span>
                         </div>
-                        <div className="flex items-center">
+                        <div className="flex items-center mb-2">
                           <svg className="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                           </svg>
                           <span className="font-medium text-gray-700">Email:</span>
                           <span className="ml-2 text-gray-900">{appointment.email}</span>
                         </div>
+                        <div className="flex items-center">
+                          <svg className="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                          <span className="font-medium text-gray-700">Location:</span>
+                          <span className="ml-2 text-gray-900">{appointment.location}</span>
+                        </div>
                       </div>
                       
                       <div>
                         <div className="mb-2">
-                          <span className="font-medium text-gray-700">Notes:</span>
-                          <p className="text-gray-900 mt-1">{appointment.notes}</p>
+                          <div className="flex items-center mb-2">
+                            <svg className="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            <span className="font-medium text-gray-700">Notes:</span>
+                          </div>
+                          <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                            <p className="text-gray-900 text-sm">
+                              {appointment.notes && appointment.notes !== 'No notes' 
+                                ? appointment.notes 
+                                : 'No notes added for this appointment'
+                              }
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>
 
                     <div className="flex items-center justify-end space-x-3 mt-4 pt-4 border-t border-gray-100">
-                      <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+                      <button 
+                        onClick={() => handleEditAppointment(appointment)}
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                      >
                         Edit
                       </button>
                       <button className="px-4 py-2 text-sm font-medium text-white bg-gold hover:bg-gold rounded-lg transition-colors">
@@ -983,6 +1626,254 @@ export default function AdminDashboard() {
                 <button
                   onClick={() => setShowAppointmentModal(false)}
                   className="px-6 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Notes Modal */}
+      {showEditModal && editingOrder && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-semibold text-gray-900">
+                  Edit Appointment Notes
+                </h3>
+                <button
+                  onClick={() => {
+                    setShowEditModal(false)
+                    setEditingOrder(null)
+                    setEditNotes('')
+                  }}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="mb-6">
+                <div className="mb-4">
+                  <h4 className="font-medium text-gray-900 mb-2">Customer: {editingOrder.customer}</h4>
+                  <p className="text-gray-600 mb-2">Service: {editingOrder.service}</p>
+                  <p className="text-gray-600">Date: {editingOrder.time}</p>
+                </div>
+                
+                <div>
+                  <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-2">
+                    Admin Notes
+                  </label>
+                  <textarea
+                    id="notes"
+                    value={editNotes}
+                    onChange={(e) => setEditNotes(e.target.value)}
+                    rows={4}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-gold resize-none"
+                    placeholder="Add notes about this appointment..."
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    These notes will be visible to the customer and admin.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end space-x-3">
+                <button
+                  onClick={() => {
+                    setShowEditModal(false)
+                    setEditingOrder(null)
+                    setEditNotes('')
+                  }}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveNotes}
+                  className="px-4 py-2 text-sm font-medium text-white bg-gold hover:bg-gold rounded-lg transition-colors"
+                >
+                  Save Notes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modal */}
+      {showConfirmModal && orderToComplete && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-gray-900">Confirm Service Completion</h3>
+                <button
+                  onClick={handleCancelComplete}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="mb-6">
+                <p className="text-gray-600 mb-4">
+                  Are you sure you want to mark this service as completed?
+                </p>
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <div className="text-sm">
+                    <div className="font-medium text-gray-900">
+                      Order #{orderToComplete.id.slice(-8)}
+                    </div>
+                    <div className="text-gray-600 mt-1">
+                      {orderToComplete.customer_info?.firstName} {orderToComplete.customer_info?.lastName}
+                    </div>
+                    <div className="text-gray-600">
+                      {orderToComplete.items?.[0]?.name || 'Service'}
+                    </div>
+                    <div className="text-gray-600">
+                      ${orderToComplete.total?.toFixed(2)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={handleCancelComplete}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirmComplete}
+                  className="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
+                >
+                  Mark as Completed
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* User Details Modal */}
+      {showUserModal && selectedUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-semibold text-gray-900">User Details</h3>
+                <button
+                  onClick={handleCloseUserModal}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="space-y-6">
+                {/* User Basic Info */}
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h4 className="text-lg font-medium text-gray-900 mb-4">Basic Information</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">Full Name</label>
+                      <p className="text-gray-900">{selectedUser.first_name} {selectedUser.last_name}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">Email</label>
+                      <p className="text-gray-900">{selectedUser.email}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">Phone</label>
+                      <p className="text-gray-900">{selectedUser.phone || 'Not provided'}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">Member Since</label>
+                      <p className="text-gray-900">{new Date(selectedUser.created_at).toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Service History */}
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h4 className="text-lg font-medium text-gray-900 mb-4">Service History</h4>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium text-gray-500">Total Services</span>
+                      <span className="text-lg font-semibold text-gold">{selectedUser.order_count}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium text-gray-500">Total Spent</span>
+                      <span className="text-lg font-semibold text-gold">
+                        ${selectedUser.total_spent?.toFixed(2) || '0.00'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Directions */}
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h4 className="text-lg font-medium text-gray-900 mb-4">Service Locations</h4>
+                  {selectedUser.recent_orders && selectedUser.recent_orders.length > 0 ? (
+                    <div className="space-y-3">
+                      {selectedUser.recent_orders
+                        .filter((order, index, self) => 
+                          // Get unique locations only
+                          order.location?.fullAddress && 
+                          self.findIndex(o => o.location?.fullAddress === order.location?.fullAddress) === index
+                        )
+                        .slice(0, 5)
+                        .map((order, index) => (
+                        <div key={index} className="py-3 border-b border-gray-200 last:border-b-0">
+                          <div className="flex items-start space-x-3">
+                            <div className="flex-shrink-0">
+                              <div className="w-8 h-8 bg-gold rounded-full flex items-center justify-center">
+                                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                              </div>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-gray-900">
+                                {order.location?.fullAddress || 'No address provided'}
+                              </p>
+                              {order.location?.serviceAreaName && (
+                                <p className="text-xs text-gold font-medium mt-1">
+                                  {order.location.serviceAreaName}
+                                </p>
+                              )}
+                              {order.scheduled_date && (
+                                <p className="text-xs text-gray-500 mt-1">
+                                  Last service: {new Date(order.scheduled_date).toLocaleDateString()}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 text-sm">No service locations found.</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex justify-end mt-6">
+                <button
+                  onClick={handleCloseUserModal}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
                 >
                   Close
                 </button>

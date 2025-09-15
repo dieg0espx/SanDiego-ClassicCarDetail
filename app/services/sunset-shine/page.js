@@ -2,8 +2,30 @@ import Header from '../../../components/Header'
 import Footer from '../../../components/Footer'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useCart } from '../../../contexts/CartContext'
 
 export default function SunsetShine() {
+  const { addItem } = useCart()
+
+  const serviceData = {
+    id: 'sunset-shine',
+    name: 'The Sunset Shine',
+    description: 'Our most popular service - a deeper clean with that signature SoCal sunset glow and protection.',
+    price: 200,
+    image: '/stock/2.png',
+    duration: '90-120 minutes',
+    features: [
+      'Everything in Classic Wash',
+      'UV protectant treatment',
+      'Spray wax protection'
+    ]
+  }
+
+  const handleAddToCart = () => {
+    addItem(serviceData)
+    alert('Service added to cart! You can review your order in the cart.')
+  }
+
   return (
     <div className="min-h-screen bg-white">
      
@@ -48,10 +70,16 @@ export default function SunsetShine() {
                 longer in our sunny San Diego climate.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <a href="tel:(760) 518-8451" className="bg-gold hover:bg-gold text-white px-8 py-3 rounded-lg font-semibold transition-colors text-center">
-                  Book Now - (760) 518-8451
+                <button 
+                  onClick={handleAddToCart}
+                  className="bg-gold hover:bg-gold text-white px-8 py-3 rounded-lg font-semibold transition-colors text-center"
+                >
+                  Add to Cart - $200
+                </button>
+                <a href="tel:(760) 518-8451" className="bg-gray-600 hover:bg-gray-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors text-center">
+                  Call (760) 518-8451
                 </a>
-                <Link href="/services" className="bg-gray-600 hover:bg-gray-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors text-center">
+                <Link href="/services" className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-gold px-8 py-3 rounded-lg font-semibold transition-colors text-center">
                   View All Services
                 </Link>
               </div>
@@ -314,7 +342,13 @@ export default function SunsetShine() {
             Join thousands of satisfied customers who choose The Sunset Shine for their vehicle care needs.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="tel:(760) 518-8451" className="bg-white hover:bg-gray-100 text-gold font-bold px-8 py-3 rounded-lg transition-colors">
+            <button 
+              onClick={handleAddToCart}
+              className="bg-white hover:bg-gray-100 text-gold font-bold px-8 py-3 rounded-lg transition-colors"
+            >
+              Add to Cart - $200
+            </button>
+            <a href="tel:(760) 518-8451" className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-gold font-bold px-8 py-3 rounded-lg transition-colors">
               Call (760) 518-8451
             </a>
             <Link href="/services" className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-gold font-bold px-8 py-3 rounded-lg transition-colors">
