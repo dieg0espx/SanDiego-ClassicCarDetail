@@ -3,15 +3,20 @@ import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import { useAuth } from '../contexts/AuthContext'
+import { useCart } from '../contexts/CartContext'
 import AuthModal from './auth/AuthModal'
+import CartModal from './cart/CartModal'
+import { LuShoppingCart } from 'react-icons/lu'
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
+  const [showCartModal, setShowCartModal] = useState(false)
   const pathname = usePathname()
   const { user, signOut, loading } = useAuth()
+  const { getItemCount } = useCart()
 
   // Debug logging
   useEffect(() => {
@@ -211,6 +216,18 @@ export default function Header() {
                   <span className="hidden xl:block">Sign In</span>
                 </button>
               )}
+              {/* Cart Icon */}
+              <button
+                onClick={() => setShowCartModal(true)}
+                className="relative text-white hover:text-gray-300 transition-colors"
+              >
+                <LuShoppingCart className="w-6 h-6" />
+                {getItemCount() > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-gold text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+                    {getItemCount()}
+                  </span>
+                )}
+              </button>
               <a href="#quote" className="bg-white hover:bg-gray-100 text-gold font-bold px-6 py-2 rounded-lg transition-colors flex items-center space-x-2">
                 <i className="bi bi-calendar-check"></i>
                 <span>Book Now</span>
@@ -269,6 +286,20 @@ export default function Header() {
                   Contact
                 </a>
                 
+                {/* Mobile Cart */}
+                <div className="border-t border-white/20 pt-3 mt-3">
+                  <button
+                    onClick={() => {
+                      setShowCartModal(true)
+                      setIsMenuOpen(false)
+                    }}
+                    className="flex items-center space-x-2 w-full text-left px-3 py-2 rounded-md text-base font-medium text-white hover:text-gray-300 hover:bg-gray-700 transition-colors"
+                  >
+                    <LuShoppingCart className="w-5 h-5" />
+                    <span>Cart ({getItemCount()})</span>
+                  </button>
+                </div>
+
                 {/* Mobile Auth */}
                 {user ? (
                   <div className="border-t border-white/20 pt-3 mt-3">
@@ -355,6 +386,12 @@ export default function Header() {
       <AuthModal 
         isOpen={showAuthModal} 
         onClose={() => setShowAuthModal(false)} 
+      />
+
+      {/* Cart Modal */}
+      <CartModal 
+        isOpen={showCartModal} 
+        onClose={() => setShowCartModal(false)} 
       />
 
       {/* Click outside handler for user menu */}

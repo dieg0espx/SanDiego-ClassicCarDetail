@@ -2,6 +2,7 @@ import './globals.css'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { AuthProvider } from '../contexts/AuthContext'
+import { CartProvider } from '../contexts/CartContext'
 
 export const metadata = {
   title: 'San Diego Classic Auto Detail - Mobile Detailing',
@@ -16,9 +17,11 @@ export default function RootLayout({ children }) {
       </head>
       <body className="min-h-screen bg-gray-50">
         <AuthProvider>
-          <Header />
-          {children}
-          <Footer />
+          <CartProvider>
+            <Header />
+            {children}
+            <Footer />
+          </CartProvider>
         </AuthProvider>
       </body>
     </html>

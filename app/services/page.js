@@ -1,9 +1,60 @@
+'use client'
+import { useState } from 'react'
 import Header from '../../components/Header'
 import Footer from '../../components/Footer'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useCart } from '../../contexts/CartContext'
+import CartModal from '../../components/cart/CartModal'
 
 export default function Services() {
+  const { addItem } = useCart()
+  const [showCartModal, setShowCartModal] = useState(false)
+
+  const services = [
+    {
+      id: 'classic-wash',
+      name: 'The Classic Wash',
+      description: 'Perfect for a quick, refreshing clean that gets your vehicle looking great in no time.',
+      price: 170,
+      image: '/stock/1.png',
+      features: [
+        'Two-stage hand wash',
+        'Wheel & tire cleaning',
+        'Interior vacuum & wipe down'
+      ]
+    },
+    {
+      id: 'sunset-shine',
+      name: 'The Sunset Shine',
+      description: 'Our most popular service - a deeper clean with that signature SoCal sunset glow and protection.',
+      price: 200,
+      image: '/stock/2.png',
+      features: [
+        'Everything in Classic Wash',
+        'UV protectant treatment',
+        'Spray wax protection'
+      ]
+    },
+    {
+      id: 'hot-rod-detail',
+      name: 'The Hot Rod Detail',
+      description: 'Show-quality detailing inspired by classic hot rods - for when you want your ride to turn heads.',
+      price: 270,
+      image: '/stock/3.png',
+      features: [
+        'Three-step wash & wax',
+        'Full interior shampoo',
+        'Leather reconditioning'
+      ]
+    }
+  ]
+
+  const handleAddToCart = (service) => {
+    addItem(service)
+    setShowCartModal(true)
+  }
+
   return (
     <div className="min-h-screen bg-white">
       
@@ -35,145 +86,51 @@ export default function Services() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {/* The Classic Wash */}
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-              <div className="relative h-40 sm:h-48">
-                <Image
-                  src="/stock/1.png"
-                  alt="The Classic Wash Service"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div className="p-4 sm:p-6">
-                <h3 className="text-xl sm:text-2xl font-bold text-black mb-2">The Classic Wash</h3>
-                <div className="text-2xl sm:text-3xl font-bold text-gold mb-3 sm:mb-4">$170</div>
-                <p className="text-gray-600 mb-4 text-sm sm:text-base">Perfect for a quick, refreshing clean that gets your vehicle looking great in no time.</p>
-                <ul className="space-y-2 mb-4 sm:mb-6">
-                  <li className="flex items-center text-xs sm:text-sm text-gray-700">
-                    <svg className="w-3 h-3 sm:w-4 sm:h-4 text-gold mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                    Two-stage hand wash
-                  </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-700">
-                    <svg className="w-3 h-3 sm:w-4 sm:h-4 text-gold mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                    Wheel & tire cleaning
-                  </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-700">
-                    <svg className="w-3 h-3 sm:w-4 sm:h-4 text-gold mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                    Interior vacuum & wipe down
-                  </li>
-                </ul>
-                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
-                  <Link href="/services/classic-wash" className="flex-1 bg-gold hover:bg-gold text-white text-center py-2 sm:py-2 px-4 rounded-lg font-semibold transition-colors text-sm sm:text-base">
-                    Learn More
-                  </Link>
-                  <a href="tel:(760) 518-8451" className="flex-1 bg-gray-600 hover:bg-gray-700 text-white text-center py-2 sm:py-2 px-4 rounded-lg font-semibold transition-colors text-sm sm:text-base">
-                    Book Now
-                  </a>
+            {services.map((service, index) => (
+              <div key={service.id} className={`bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow ${index === 1 ? 'border-2 border-gold' : ''}`}>
+                <div className="relative h-40 sm:h-48">
+                  <Image
+                    src={service.image}
+                    alt={`${service.name} Service`}
+                    fill
+                    className="object-cover"
+                  />
+                  {index === 1 && (
+                    <div className="absolute top-4 left-4">
+                      <span className="bg-gold text-white px-3 py-1 rounded-full text-sm font-semibold">
+                        Most Popular
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <div className="p-4 sm:p-6">
+                  <h3 className="text-xl sm:text-2xl font-bold text-black mb-2">{service.name}</h3>
+                  <div className="text-2xl sm:text-3xl font-bold text-gold mb-3 sm:mb-4">${service.price}</div>
+                  <p className="text-gray-600 mb-4 text-sm sm:text-base">{service.description}</p>
+                  <ul className="space-y-2 mb-4 sm:mb-6">
+                    {service.features.map((feature, featureIndex) => (
+                      <li key={featureIndex} className="flex items-center text-xs sm:text-sm text-gray-700">
+                        <svg className="w-3 h-3 sm:w-4 sm:h-4 text-gold mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+                    <Link href={`/services/${service.id}`} className="flex-1 bg-gold hover:bg-gold text-white text-center py-2 sm:py-2 px-4 rounded-lg font-semibold transition-colors text-sm sm:text-base">
+                      Learn More
+                    </Link>
+                    <button 
+                      onClick={() => handleAddToCart(service)}
+                      className="flex-1 bg-gray-600 hover:bg-gray-700 text-white text-center py-2 sm:py-2 px-4 rounded-lg font-semibold transition-colors text-sm sm:text-base"
+                    >
+                      Add to Cart
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-
-            {/* The Sunset Shine */}
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow border-2 border-gold">
-              <div className="relative h-48">
-                <Image
-                  src="/stock/2.png"
-                  alt="The Sunset Shine Service"
-                  fill
-                  className="object-cover"
-                />
-                <div className="absolute top-4 left-4">
-                  <span className="bg-gold text-white px-3 py-1 rounded-full text-sm font-semibold">
-                    Most Popular
-                  </span>
-                </div>
-              </div>
-              <div className="p-6">
-                <h3 className="text-2xl font-bold text-black mb-2">The Sunset Shine</h3>
-                <div className="text-3xl font-bold text-gold mb-4">$200</div>
-                <p className="text-gray-600 mb-4">Our most popular service - a deeper clean with that signature SoCal sunset glow and protection.</p>
-                <ul className="space-y-2 mb-6">
-                  <li className="flex items-center text-sm text-gray-700">
-                    <svg className="w-4 h-4 text-gold mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                    Everything in Classic Wash
-                  </li>
-                  <li className="flex items-center text-sm text-gray-700">
-                    <svg className="w-4 h-4 text-gold mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                    UV protectant treatment
-                  </li>
-                  <li className="flex items-center text-sm text-gray-700">
-                    <svg className="w-4 h-4 text-gold mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                    Spray wax protection
-                  </li>
-                </ul>
-                <div className="flex space-x-3">
-                  <Link href="/services/sunset-shine" className="flex-1 bg-gold hover:bg-gold text-white text-center py-2 px-4 rounded-lg font-semibold transition-colors">
-                    Learn More
-                  </Link>
-                  <a href="tel:(760) 518-8451" className="flex-1 bg-gray-600 hover:bg-gray-700 text-white text-center py-2 px-4 rounded-lg font-semibold transition-colors">
-                    Book Now
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            {/* The Hot Rod Detail */}
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-              <div className="relative h-48">
-                <Image
-                  src="/stock/3.png"
-                  alt="The Hot Rod Detail Service"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div className="p-6">
-                <h3 className="text-2xl font-bold text-black mb-2">The Hot Rod Detail</h3>
-                <div className="text-3xl font-bold text-gold mb-4">$270</div>
-                <p className="text-gray-600 mb-4">Show-quality detailing inspired by classic hot rods - for when you want your ride to turn heads.</p>
-                <ul className="space-y-2 mb-6">
-                  <li className="flex items-center text-sm text-gray-700">
-                    <svg className="w-4 h-4 text-gold mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                    Three-step wash & wax
-                  </li>
-                  <li className="flex items-center text-sm text-gray-700">
-                    <svg className="w-4 h-4 text-gold mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                    Full interior shampoo
-                  </li>
-                  <li className="flex items-center text-sm text-gray-700">
-                    <svg className="w-4 h-4 text-gold mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                    Leather reconditioning
-                  </li>
-                </ul>
-                <div className="flex space-x-3">
-                  <Link href="/services/hot-rod-detail" className="flex-1 bg-gold hover:bg-gold text-white text-center py-2 px-4 rounded-lg font-semibold transition-colors">
-                    Learn More
-                  </Link>
-                  <a href="tel:(760) 518-8451" className="flex-1 bg-gray-600 hover:bg-gray-700 text-white text-center py-2 px-4 rounded-lg font-semibold transition-colors">
-                    Book Now
-                  </a>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
           
           {/* Pricing Disclaimer */}
@@ -350,6 +307,11 @@ export default function Services() {
         </div>
       </section>
 
+      {/* Cart Modal */}
+      <CartModal 
+        isOpen={showCartModal} 
+        onClose={() => setShowCartModal(false)} 
+      />
     </div>
   )
 }
