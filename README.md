@@ -59,7 +59,6 @@ npm run dev
 - **Autoprefixer** - CSS vendor prefixing
 
 ## Customization
-
 The website is designed with a clean, monochromatic aesthetic. You can customize:
 
 - Colors in `tailwind.config.js`
