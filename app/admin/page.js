@@ -50,8 +50,8 @@ export default function AdminDashboard() {
       router.push('/')
     } else if (user) {
       // Check if user is admin
-      const adminEmail = 'aletxa.pascual@gmail.com'
-      if (user.email === adminEmail) {
+      const isUserAdmin = user.user_metadata?.role === 'admin' || user.email === 'admin@test.com'
+      if (isUserAdmin) {
         setIsAdmin(true)
         fetchOrders() // Fetch orders when admin loads
       } else {

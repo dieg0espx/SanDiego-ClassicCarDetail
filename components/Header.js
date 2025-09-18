@@ -160,7 +160,7 @@ export default function Header() {
                           <div className="text-xs text-gray-500 mt-1">{getUserEmail()}</div>
                         )}
                       </div>
-                      {getUserEmail() === 'aletxa.pascual@gmail.com' ? (
+                      {(user?.user_metadata?.role === 'admin' || getUserEmail() === 'admin@test.com') ? (
                         // Admin menu - only admin dashboard and sign out
                         <>
                           <a
@@ -318,7 +318,7 @@ export default function Header() {
                         </div>
                       </div>
                     </div>
-                    {getUserEmail() === 'aletxa.pascual@gmail.com' ? (
+                    {(user?.user_metadata?.role === 'admin' || getUserEmail() === 'admin@test.com') ? (
                       // Admin menu - only admin dashboard and sign out
                       <a
                         href="/admin"
