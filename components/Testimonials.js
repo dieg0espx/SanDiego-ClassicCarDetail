@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { motion } from 'framer-motion';
 
 export default function Testimonials() {
   const [isPaused, setIsPaused] = useState(false);
@@ -190,14 +191,32 @@ export default function Testimonials() {
     <section className="py-12 sm:py-16 lg:py-20 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center mb-8 sm:mb-12 lg:mb-16">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-black mb-2 sm:mb-3 lg:mb-4 px-2">
+        <motion.div 
+          className="text-center mb-8 sm:mb-12 lg:mb-16"
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
+        >
+          <motion.h2 
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-black mb-2 sm:mb-3 lg:mb-4 px-2"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            viewport={{ once: true }}
+          >
             What Our Customers Say
-          </h2>
-          <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-4">
+          </motion.h2>
+          <motion.p 
+            className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-4"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            viewport={{ once: true }}
+          >
             Don't just take our word for it - hear from classic auto owners across San Diego County who trust us with their prized vehicles.
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
 
         {/* Auto-scrolling Testimonials */}
         <div 
@@ -290,17 +309,35 @@ export default function Testimonials() {
         </div>
 
         {/* Bottom CTA */}
-        <div className="text-center mt-8 sm:mt-12 lg:mt-16">
-          <p className="text-sm sm:text-base md:text-lg text-gray-600 mb-4 sm:mb-6 px-4">
+        <motion.div 
+          className="text-center mt-8 sm:mt-12 lg:mt-16"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.6 }}
+          viewport={{ once: true }}
+        >
+          <motion.p 
+            className="text-sm sm:text-base md:text-lg text-gray-600 mb-4 sm:mb-6 px-4"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.8 }}
+            viewport={{ once: true }}
+          >
             Ready to experience the same level of care for your classic auto?
-          </p>
-          <a
+          </motion.p>
+          <motion.a
             href="tel:(760) 518-8451"
             className="bg-gold hover:bg-gold/90 text-white px-4 sm:px-6 md:px-8 py-2 sm:py-3 md:py-4 rounded-lg text-sm sm:text-base md:text-lg font-semibold transition-colors shadow-lg inline-block"
+            initial={{ opacity: 0, scale: 0.8 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, delay: 1 }}
+            viewport={{ once: true }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
             Get Your Quote Today
-          </a>
-        </div>
+          </motion.a>
+        </motion.div>
       </div>
     </section>
   );

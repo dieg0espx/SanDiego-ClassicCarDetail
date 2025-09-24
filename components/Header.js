@@ -7,6 +7,7 @@ import { useCart } from '../contexts/CartContext'
 import AuthModal from './auth/AuthModal'
 import CartModal from './cart/CartModal'
 import { FiShoppingCart } from 'react-icons/fi'
+import { motion, AnimatePresence } from 'framer-motion'
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -76,15 +77,27 @@ export default function Header() {
      
 
       {/* Main Navigation Bar */}
-      <header 
+      <motion.header 
         className="text-white fixed top-0 left-0 right-0 z-50 transition-all duration-300 w-full bg-black"
-       
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
       >
         <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-3 items-center py-3 sm:py-2">
             {/* Logo */}
-            <div className="flex-shrink-0 flex lg:justify-start justify-start">
-              <a href="/" className="block hover:opacity-90 transition-opacity duration-200">
+            <motion.div 
+              className="flex-shrink-0 flex lg:justify-start justify-start"
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              <motion.a 
+                href="/" 
+                className="block hover:opacity-90 transition-opacity duration-200"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
                 <Image
                   src="/logo.png"
                   alt="San Diego Classic Auto Detail"
@@ -92,19 +105,43 @@ export default function Header() {
                   height={60}
                   className="h-10 sm:h-12 lg:h-16 w-auto"
                 />
-              </a>
-            </div>
+              </motion.a>
+            </motion.div>
 
             {/* Desktop Navigation Links - Center Column */}
-            <nav className="hidden lg:flex items-center space-x-8 justify-center">
-              <a href="/" className="hover:text-gray-300 transition-colors">Home</a>
-              <a href="/services" className="hover:text-gray-300 transition-colors">Services</a>
-              <a href="/packages" className="hover:text-gray-300 transition-colors">Packages</a>
-              <a href="/contact" className="hover:text-gray-300 transition-colors">Contact</a>
-            </nav>
+            <motion.nav 
+              className="hidden lg:flex items-center space-x-8 justify-center"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+            >
+              {[
+                { href: "/", label: "Home" },
+                { href: "/services", label: "Services" },
+                { href: "/packages", label: "Packages" },
+                { href: "/contact", label: "Contact" }
+              ].map((link, index) => (
+                <motion.a 
+                  key={link.href}
+                  href={link.href} 
+                  className="hover:text-gray-300 transition-colors"
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.6 + (index * 0.1) }}
+                  whileHover={{ scale: 1.05 }}
+                >
+                  {link.label}
+                </motion.a>
+              ))}
+            </motion.nav>
 
             {/* Desktop Call-to-Action Button & Auth */}
-            <div className="hidden lg:flex items-center space-x-8 flex-shrink-0 justify-end">
+            <motion.div 
+              className="hidden lg:flex items-center space-x-8 flex-shrink-0 justify-end"
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+            >
               {user ? (
                 <div className="relative">
                   <button
@@ -187,55 +224,114 @@ export default function Header() {
                 </button>
               )}
               {/* Cart Icon */}
-              <button
+              <motion.button
                 onClick={() => setShowCartModal(true)}
                 className="relative text-white hover:text-gray-300 transition-colors"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
               >
                 <FiShoppingCart className="w-6 h-6" />
-                {getItemCount() > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-gold text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
-                    {getItemCount()}
-                  </span>
-                )}
-              </button>
-              <a href="#quote" className="bg-gold hover:bg-gold/90 text-white font-bold px-6 py-2 rounded-lg transition-colors flex items-center space-x-2">
+                <AnimatePresence>
+                  {getItemCount() > 0 && (
+                    <motion.span 
+                      className="absolute -top-2 -right-2 bg-gold text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      exit={{ scale: 0 }}
+                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    >
+                      {getItemCount()}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </motion.button>
+              <motion.a 
+                href="#quote" 
+                className="bg-gold hover:bg-gold/90 text-white font-bold px-6 py-2 rounded-lg transition-colors flex items-center space-x-2"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
                 <i className="bi bi-calendar-check"></i>
                 <span>Book Now</span>
-              </a>
-            </div>
+              </motion.a>
+            </motion.div>
 
             {/* Mobile Menu Button - Only burger menu */}
-            <div className="lg:hidden flex items-center justify-end">
-              <button
+            <motion.div 
+              className="lg:hidden flex items-center justify-end"
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.8 }}
+            >
+              <motion.button
                 onClick={toggleMenu}
                 className="p-2 rounded-md text-white hover:text-gray-300 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white transition-colors"
                 aria-expanded={isMenuOpen}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
               >
                 <span className="sr-only">Open main menu</span>
-                {!isMenuOpen ? (
-                  <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-                  </svg>
-                ) : (
-                  <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                )}
-              </button>
-            </div>
+                <AnimatePresence mode="wait">
+                  {!isMenuOpen ? (
+                    <motion.svg 
+                      key="menu"
+                      className="h-6 w-6" 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      fill="none" 
+                      viewBox="0 0 24 24" 
+                      stroke="currentColor" 
+                      aria-hidden="true"
+                      initial={{ rotate: 0 }}
+                      animate={{ rotate: 0 }}
+                      exit={{ rotate: 90 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </motion.svg>
+                  ) : (
+                    <motion.svg 
+                      key="close"
+                      className="h-6 w-6" 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      fill="none" 
+                      viewBox="0 0 24 24" 
+                      stroke="currentColor" 
+                      aria-hidden="true"
+                      initial={{ rotate: 90 }}
+                      animate={{ rotate: 0 }}
+                      exit={{ rotate: -90 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                    </motion.svg>
+                  )}
+                </AnimatePresence>
+              </motion.button>
+            </motion.div>
           </div>
 
           {/* Mobile Sidebar Menu */}
-          {isMenuOpen && (
-            <>
-              {/* Backdrop */}
-              <div 
-                className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-                onClick={() => setIsMenuOpen(false)}
-              />
-              
-              {/* Sidebar */}
-              <div className="fixed top-0 right-0 h-full w-80 bg-black/95 backdrop-blur-md border-l border-white/10 z-50 lg:hidden transform transition-transform duration-300 ease-in-out">
+          <AnimatePresence>
+            {isMenuOpen && (
+              <>
+                {/* Backdrop */}
+                <motion.div 
+                  className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+                  onClick={() => setIsMenuOpen(false)}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                />
+                
+                {/* Sidebar */}
+                <motion.div 
+                  className="fixed top-0 right-0 h-full w-80 bg-black/95 backdrop-blur-md border-l border-white/10 z-50 lg:hidden"
+                  initial={{ x: "100%" }}
+                  animate={{ x: 0 }}
+                  exit={{ x: "100%" }}
+                  transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                >
                 <div className="flex flex-col h-full">
                   {/* Sidebar Header */}
                   <div className="flex items-center justify-between p-6 border-b border-white/10">
@@ -377,11 +473,12 @@ export default function Header() {
                     </a>
                   </div>
                 </div>
-              </div>
-            </>
-          )}
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
         </div>
-      </header>
+      </motion.header>
 
       {/* Auth Modal */}
       <AuthModal 
