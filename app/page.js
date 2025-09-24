@@ -10,6 +10,12 @@ import ContactCTA from '../components/ContactCTA'
 import Pricing from '../components/PricingTable'
 
 export default function Home() {
+
+  let age = 25
+
+console.log(`I'm ${age} years old`);
+
+
   return (
     <main className="min-h-screen">
       <Hero />
