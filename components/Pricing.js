@@ -1,6 +1,40 @@
-import React from 'react'
+'use client'
+
+import React, { useState } from 'react'
+import { useCart } from '../contexts/CartContext'
 
 export default function Pricing() {
+  const { addItem } = useCart()
+  const [addedItems, setAddedItems] = useState(new Set())
+
+  const handleAddToCart = (plan) => {
+    // Extract numeric price from string (remove $ and convert to number)
+    const numericPrice = parseFloat(plan.price.replace('$', ''))
+    
+    const cartItem = {
+      id: plan.id,
+      name: plan.name,
+      price: numericPrice,
+      description: plan.description,
+      features: plan.features,
+      popular: plan.popular
+    }
+    
+    addItem(cartItem)
+    
+    // Show feedback that item was added
+    setAddedItems(prev => new Set([...prev, plan.id]))
+    
+    // Reset the feedback after 2 seconds
+    setTimeout(() => {
+      setAddedItems(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(plan.id)
+        return newSet
+      })
+    }, 2000)
+  }
+
   const pricingPlans = [
     {
       id: 1,
@@ -153,13 +187,25 @@ export default function Pricing() {
                 {/* CTA Button */}
                 <div className="text-center mt-auto">
                   <button 
+                    onClick={() => handleAddToCart(plan)}
                     className={`w-full ${
-                      plan.popular 
-                        ? 'bg-gold hover:bg-gold/90 text-white' 
-                        : 'bg-transparent hover:bg-gold hover:text-white text-gold border-2 border-gold'
+                      addedItems.has(plan.id)
+                        ? 'bg-green-500 hover:bg-green-600 text-white'
+                        : plan.popular 
+                          ? 'bg-gold hover:bg-gold/90 text-white' 
+                          : 'bg-transparent hover:bg-gold hover:text-white text-gold border-2 border-gold'
                     } font-bold py-4 px-6 rounded-xl transition-all duration-300 group-hover:scale-105`}
                   >
-                    {plan.popular ? 'Choose Popular' : 'Select Plan'}
+                    {addedItems.has(plan.id) ? (
+                      <div className="flex items-center justify-center">
+                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        Added to Cart
+                      </div>
+                    ) : (
+                      plan.popular ? 'Choose Popular' : 'Select Plan'
+                    )}
                   </button>
                 </div>
               </div>
