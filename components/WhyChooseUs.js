@@ -1,4 +1,26 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+
 export default function WhyChooseUs() {
+  const [currentImage, setCurrentImage] = useState(0)
+  const [isTransitioning, setIsTransitioning] = useState(false)
+  const images = [
+    "/bmw-suv.jpg",
+    "/warehouse-bg.png"
+  ]
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsTransitioning(true)
+      setTimeout(() => {
+        setCurrentImage((prevImage) => (prevImage + 1) % images.length)
+        setIsTransitioning(false)
+      }, 300) // Half of transition duration for smooth effect
+    }, 3000) // Increased to 3 seconds for better viewing
+
+    return () => clearInterval(interval)
+  }, [images.length])
   return (
     <section className="py-20 bg-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -76,9 +98,9 @@ export default function WhyChooseUs() {
           <div className="relative">
             <div className="relative rounded-2xl overflow-hidden shadow-2xl h-[500px] lg:h-[600px]">
               <img 
-                src="/bmw-suv.jpg" 
+                src="/warehouse-bg.png" 
                 alt="Classic cars at sunset" 
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover transition-opacity duration-500"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
               
