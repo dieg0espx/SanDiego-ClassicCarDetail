@@ -81,8 +81,8 @@ export default function RootLayout({ children }) {
         <link rel="manifest" href="/site.webmanifest" />
         
         {/* Theme Color for Mobile Browsers */}
-        <meta name="theme-color" content="#AF945B" />
-        <meta name="msapplication-TileColor" content="#AF945B" />
+        <meta name="theme-color" content="#000000" />
+        <meta name="msapplication-TileColor" content="#000000" />
         
         {/* Bootstrap Icons */}
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
