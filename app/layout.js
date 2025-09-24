@@ -15,7 +15,7 @@ export default function RootLayout({ children }) {
       <head>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
       </head>
-      <body className="min-h-screen overflow-x-hidden">
+      <body className="min-h-screen overflow-x-hidden -mt-4">
         <AuthProvider>
           <CartProvider>
             <Header />

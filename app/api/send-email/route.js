@@ -95,7 +95,7 @@ This message was sent from the San Diego Classic Auto Detail contact form.
     // Send email
     const info = await transporter.sendMail({
       from: `"San Diego Classic Auto Detail" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
-      to: process.env.CONTACT_EMAIL,
+      to: ['tecnodael@gmail.com', 'sdclassicautodetail@outlook.com'],
       subject: `New Contact Form Submission from ${name}`,
       text: emailText,
       html: emailHtml,
