@@ -17,6 +17,8 @@ export default function Dashboard() {
   const [showCancelModal, setShowCancelModal] = useState(false)
   const [orderToCancel, setOrderToCancel] = useState(null)
   const [notification, setNotification] = useState(null)
+  const [showAppointmentModal, setShowAppointmentModal] = useState(false)
+  const [selectedAppointment, setSelectedAppointment] = useState(null)
 
   useEffect(() => {
     if (!loading && !user) {
@@ -89,6 +91,18 @@ export default function Dashboard() {
       new Date(order.scheduled_date) >= new Date() &&
       ['pending', 'confirmed', 'in_progress'].includes(order.status)
     )
+  }
+
+  const getAllAppointments = () => {
+    return orders.filter(order => 
+      order.scheduled_date && 
+      order.scheduled_time
+    ).sort((a, b) => {
+      // Sort by scheduled_date and scheduled_time, most recent first
+      const dateA = new Date(a.scheduled_date + 'T' + a.scheduled_time)
+      const dateB = new Date(b.scheduled_date + 'T' + b.scheduled_time)
+      return dateB - dateA
+    })
   }
 
   const getNextAppointment = () => {
@@ -176,7 +190,7 @@ export default function Dashboard() {
         day: day,
         isToday: currentDate.getTime() === today.getTime(),
         isSelected: currentDate.toDateString() === selectedDate.toDateString(),
-        hasAppointment: getUpcomingAppointments().some(appointment => 
+        hasAppointment: getAllAppointments().some(appointment => 
           appointment.scheduled_date && 
           new Date(appointment.scheduled_date + 'T00:00:00').toDateString() === currentDate.toDateString()
         )
@@ -188,7 +202,7 @@ export default function Dashboard() {
 
   const getAppointmentsForDate = (date) => {
     const dateString = date.toISOString().split('T')[0]
-    return getUpcomingAppointments().filter(appointment => 
+    return getAllAppointments().filter(appointment => 
       appointment.scheduled_date === dateString
     )
   }
@@ -240,6 +254,16 @@ export default function Dashboard() {
     setOrderToCancel(null)
   }
 
+  const handleAppointmentClick = (appointment) => {
+    setSelectedAppointment(appointment)
+    setShowAppointmentModal(true)
+  }
+
+  const closeAppointmentModal = () => {
+    setShowAppointmentModal(false)
+    setSelectedAppointment(null)
+  }
+
   const showNotification = (message, type = 'success') => {
     setNotification({ message, type })
     setTimeout(() => setNotification(null), 3000)
@@ -268,15 +292,15 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Welcome back, {getUserDisplayName().split(' ')[0]}!</h1>
-              <p className="text-gray-600 mt-2">Manage your car detailing services and appointments</p>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mb-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-4 sm:space-y-0">
+            <div className="flex-1">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Welcome back, {getUserDisplayName().split(' ')[0]}!</h1>
+              <p className="text-gray-600 mt-2 text-sm sm:text-base">Manage your car detailing services and appointments</p>
             </div>
             <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 bg-gold rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-xl">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gold rounded-full flex items-center justify-center">
+                <span className="text-white font-bold text-lg sm:text-xl">
                   {getUserDisplayName().charAt(0).toUpperCase()}
                 </span>
               </div>
@@ -288,12 +312,12 @@ export default function Dashboard() {
         {/* Navigation Tabs */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
           <div className="border-b border-gray-200">
-            <nav className="flex space-x-8 px-6">
+            <nav className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-8 px-4 sm:px-6">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 ${
+                  className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-sm flex items-center justify-center sm:justify-start space-x-2 ${
                     activeTab === tab.id
                       ? 'border-gold text-gold'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -302,7 +326,8 @@ export default function Dashboard() {
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={tab.icon} />
                   </svg>
-                  <span>{tab.label}</span>
+                  <span className="hidden sm:inline">{tab.label}</span>
+                  <span className="sm:hidden">{tab.label}</span>
                 </button>
               ))}
             </nav>
@@ -350,44 +375,50 @@ export default function Dashboard() {
 
                 {/* Next Service Due */}
                 {getNextAppointment() ? (
-                  <div className="bg-gold rounded-lg p-6 text-white">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-xl font-semibold mb-2">Next Service Due</h3>
-                        <p className="text-white/90">
+                  <div className="bg-gold rounded-lg p-4 sm:p-6 text-white">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
+                      <div className="flex-1">
+                        <h3 className="text-lg sm:text-xl font-semibold mb-2">Next Service Due</h3>
+                        <p className="text-white/90 text-sm sm:text-base leading-relaxed">
                           Your next service is scheduled for {formatDate(getNextAppointment().scheduled_date)} at {formatTime(getNextAppointment().scheduled_time)}
                         </p>
                         <a 
                           href="/services" 
-                          className="mt-4 inline-block bg-white text-gold font-medium px-6 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+                          className="mt-4 inline-block bg-white text-gold font-medium px-4 sm:px-6 py-2 rounded-lg hover:bg-gray-100 transition-colors text-sm sm:text-base"
                         >
                           Book Another Service
                         </a>
                       </div>
-                      <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center">
-                        <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
+                      {/* Icon - Hidden on mobile, visible on desktop */}
+                      <div className="hidden sm:flex flex-shrink-0 justify-end">
+                        <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center">
+                          <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        </div>
                       </div>
                     </div>
                   </div>
                 ) : (
-                  <div className="bg-gray-100 rounded-lg p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-xl font-semibold mb-2 text-gray-900">No Upcoming Services</h3>
-                        <p className="text-gray-600">You don't have any scheduled services at the moment.</p>
+                  <div className="bg-gray-100 rounded-lg p-4 sm:p-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
+                      <div className="flex-1">
+                        <h3 className="text-lg sm:text-xl font-semibold mb-2 text-gray-900">No Upcoming Services</h3>
+                        <p className="text-gray-600 text-sm sm:text-base">You don't have any scheduled services at the moment.</p>
                         {/* <a 
                           href="/services" 
-                          className="mt-4 inline-block bg-gold text-white font-medium px-6 py-2 rounded-lg hover:bg-gold transition-colors"
+                          className="mt-4 inline-block bg-gold text-white font-medium px-4 sm:px-6 py-2 rounded-lg hover:bg-gold transition-colors text-sm sm:text-base"
                         >
                           Book Your First Service
                         </a> */}
                       </div>
-                      <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center">
-                        <svg className="w-10 h-10 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
+                      {/* Icon - Hidden on mobile, visible on desktop */}
+                      <div className="hidden sm:flex flex-shrink-0 justify-end">
+                        <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center">
+                          <svg className="w-10 h-10 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -437,7 +468,8 @@ export default function Dashboard() {
             {/* Appointments Tab */}
             {activeTab === 'appointments' && (
               <div className="space-y-6">
-                <div className="flex items-center justify-between">
+                {/* Desktop Layout */}
+                <div className="hidden sm:flex items-center justify-between">
                   <h3 className="text-lg font-semibold text-gray-900">Your Appointments</h3>
                   <div className="flex items-center space-x-4">
                     <div className="flex bg-gray-100 rounded-lg p-1">
@@ -471,6 +503,35 @@ export default function Dashboard() {
                   </div>
                 </div>
 
+                {/* Mobile Layout */}
+                <div className="sm:hidden space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Your Appointments</h3>
+                  <div className="flex justify-center">
+                    <div className="flex bg-gray-100 rounded-lg p-1 w-full max-w-xs">
+                      <button
+                        onClick={() => setViewMode('list')}
+                        className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                          viewMode === 'list' 
+                            ? 'bg-white text-gray-900 shadow-sm' 
+                            : 'text-gray-600 hover:text-gray-900'
+                        }`}
+                      >
+                        List View
+                      </button>
+                      <button
+                        onClick={() => setViewMode('calendar')}
+                        className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                          viewMode === 'calendar' 
+                            ? 'bg-white text-gray-900 shadow-sm' 
+                            : 'text-gray-600 hover:text-gray-900'
+                        }`}
+                      >
+                        Calendar View
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
                 {isLoadingOrders ? (
                   <div className="text-center py-8">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gold mx-auto"></div>
@@ -480,23 +541,23 @@ export default function Dashboard() {
                   <div className="space-y-6">
                     {/* Calendar Header */}
                     <div className="flex items-center justify-between">
-                      <h4 className="text-lg font-semibold text-gray-900">
+                      <h4 className="text-base sm:text-lg font-semibold text-gray-900">
                         {selectedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                       </h4>
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-1 sm:space-x-2">
                         <button
                           onClick={() => navigateMonth(-1)}
-                          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                          className="p-2 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors"
                         >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                           </svg>
                         </button>
                         <button
                           onClick={() => navigateMonth(1)}
-                          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                          className="p-2 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors"
                         >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                           </svg>
                         </button>
@@ -504,10 +565,10 @@ export default function Dashboard() {
                     </div>
 
                     {/* Calendar Grid */}
-                    <div className="bg-white border border-gray-200 rounded-lg p-4">
+                    <div className="bg-white border border-gray-200 rounded-lg p-2 sm:p-4">
                       <div className="grid grid-cols-7 gap-1 mb-2">
                         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-                          <div key={day} className="p-2 text-center text-sm font-medium text-gray-500">
+                          <div key={day} className="p-1 sm:p-2 text-center text-xs sm:text-sm font-medium text-gray-500">
                             {day}
                           </div>
                         ))}
@@ -518,7 +579,7 @@ export default function Dashboard() {
                             key={index}
                             onClick={() => day && setSelectedDate(day.date)}
                             disabled={!day}
-                            className={`p-3 text-center rounded-lg transition-all ${
+                            className={`p-2 sm:p-3 text-center rounded-lg transition-all text-xs sm:text-sm ${
                               !day
                                 ? 'invisible'
                                 : day.isSelected
@@ -532,7 +593,7 @@ export default function Dashboard() {
                           >
                             {day?.day}
                             {day?.hasAppointment && (
-                              <div className="w-2 h-2 bg-gold rounded-full mx-auto mt-1"></div>
+                              <div className="w-1 h-1 sm:w-2 sm:h-2 bg-gold rounded-full mx-auto mt-1"></div>
                             )}
                           </button>
                         ))}
@@ -547,48 +608,55 @@ export default function Dashboard() {
                         </h5>
                         <div className="space-y-3">
                           {getAppointmentsForDate(selectedDate).map((order) => (
-                            <div key={order.id} className="bg-white border border-gray-200 rounded-lg p-4">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-4">
-                                  <div className="w-10 h-10 bg-gold rounded-lg flex items-center justify-center">
-                                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div 
+                              key={order.id} 
+                              className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4 cursor-pointer hover:shadow-md transition-shadow"
+                              onClick={() => handleAppointmentClick(order)}
+                            >
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-3 sm:space-y-0">
+                                <div className="flex items-start sm:items-center space-x-3 sm:space-x-4">
+                                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gold rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                   </div>
-                                  <div className="flex-1">
-                                    <h6 className="font-medium text-gray-900">
+                                  <div className="flex-1 min-w-0">
+                                    <h6 className="font-medium text-gray-900 text-sm sm:text-base">
                                       {order.items?.[0]?.name || 'Service'}
                                     </h6>
-                                    <p className="text-sm text-gray-600">
+                                    <p className="text-xs sm:text-sm text-gray-600 mt-1">
                                       {formatTime(order.scheduled_time)} • {formatPrice(order.total)}
                                     </p>
-                                    <p className="text-xs text-gray-500 mt-1">
+                                    <p className="text-xs text-gray-500 mt-1 truncate">
                                        {order.location?.fullAddress || 'Location not specified'}
                                     </p>
                                     {order.notes && order.notes !== 'No notes' && (
                                       <div className="mt-2 p-2 bg-gray-50 rounded-lg border border-gray-200">
                                         <div className="flex items-start space-x-2">
-                                          <svg className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <svg className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                           </svg>
-                                          <div>
+                                          <div className="min-w-0">
                                             <p className="text-xs font-medium text-gray-700 mb-1">Admin Notes:</p>
-                                            <p className="text-xs text-gray-600">{order.notes}</p>
+                                            <p className="text-xs text-gray-600 break-words">{order.notes}</p>
                                           </div>
                                         </div>
                                       </div>
                                     )}
                                   </div>
                                 </div>
-                                <div className="flex items-center space-x-3">
-                                  <div className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
+                                <div className="flex items-center justify-between sm:justify-end space-x-2 sm:space-x-3">
+                                  <div className={`inline-flex px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${getStatusColor(order.status)}`}>
                                     {formatStatus(order.status)}
                                   </div>
                                   {(order.status === 'pending' || order.status === 'confirmed') && (
                                     <button
-                                      onClick={() => handleCancelClick(order)}
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        handleCancelClick(order)
+                                      }}
                                       disabled={cancelingOrderId === order.id}
-                                      className="text-red-600 hover:text-red-800 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                                      className="text-red-600 hover:text-red-800 text-xs sm:text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
                                     >
                                       {cancelingOrderId === order.id ? 'Canceling...' : 'Cancel'}
                                     </button>
@@ -605,60 +673,67 @@ export default function Dashboard() {
                       </div>
                     )}
                   </div>
-                ) : getUpcomingAppointments().length > 0 ? (
-                  <div className="space-y-4">
-                    {getUpcomingAppointments().map((order) => (
-                      <div key={order.id} className="bg-white border border-gray-200 rounded-lg p-6">
-                        <div className="flex items-center justify-between">
+                ) : getAllAppointments().length > 0 ? (
+                  <div className="space-y-3 sm:space-y-4">
+                    {getAllAppointments().map((order) => (
+                      <div 
+                        key={order.id} 
+                        className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4 lg:p-6 cursor-pointer hover:shadow-md transition-shadow"
+                        onClick={() => handleAppointmentClick(order)}
+                      >
+                        <div className="flex flex-col lg:flex-row lg:items-center justify-between space-y-3 lg:space-y-0">
                           <div className="flex-1">
-                            <div className="flex items-center space-x-4">
+                            <div className="flex items-start lg:items-center space-x-3 sm:space-x-4">
                               <div className="flex-shrink-0">
-                                <div className="w-12 h-12 bg-gold rounded-lg flex items-center justify-center">
-                                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gold rounded-lg flex items-center justify-center">
+                                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                   </svg>
                                 </div>
                               </div>
-                              <div className="flex-1">
-                                <h4 className="text-lg font-semibold text-gray-900">
+                              <div className="flex-1 min-w-0">
+                                <h4 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 truncate">
                                   {order.items?.[0]?.name || 'Service'}
                                 </h4>
-                                <p className="text-gray-600">
+                                <p className="text-xs sm:text-sm lg:text-base text-gray-600 mt-1">
                                   {formatDate(order.scheduled_date)} at {formatTime(order.scheduled_time)}
                                 </p>
-                                <p className="text-sm text-gray-500">{order.location?.fullAddress}</p>
+                                <p className="text-xs sm:text-sm text-gray-500 truncate mt-1">{order.location?.fullAddress}</p>
                                 {order.notes && order.notes !== 'No notes' && (
-                                  <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                  <div className="mt-3 p-2 sm:p-3 bg-gray-50 rounded-lg border border-gray-200">
                                     <div className="flex items-start space-x-2">
-                                      <svg className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <svg className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                       </svg>
-                                      <div>
-                                        <p className="text-sm font-medium text-gray-700 mb-1">Admin Notes:</p>
-                                        <p className="text-sm text-gray-600">{order.notes}</p>
+                                      <div className="min-w-0">
+                                        <p className="text-xs sm:text-sm font-medium text-gray-700 mb-1">Admin Notes:</p>
+                                        <p className="text-xs sm:text-sm text-gray-600 break-words">{order.notes}</p>
                                       </div>
                                     </div>
                                   </div>
                                 )}
                               </div>
-                              <div className="text-right">
-                                <div className="flex items-center justify-end space-x-3 mb-2">
-                                  <div className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
-                                    {formatStatus(order.status)}
-                                  </div>
-                                  {(order.status === 'pending' || order.status === 'confirmed') && (
-                                    <button
-                                      onClick={() => handleCancelClick(order)}
-                                      disabled={cancelingOrderId === order.id}
-                                      className="text-red-600 hover:text-red-800 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                      {cancelingOrderId === order.id ? 'Canceling...' : 'Cancel'}
-                                    </button>
-                                  )}
-                                </div>
-                                <p className="text-lg font-semibold text-gray-900">{formatPrice(order.total)}</p>
-                              </div>
                             </div>
+                          </div>
+                          <div className="flex flex-col sm:flex-row lg:flex-col items-start sm:items-center lg:items-end space-y-2 sm:space-y-0 sm:space-x-3 lg:space-x-0 lg:space-y-2">
+                            <div className="flex items-center space-x-2 sm:space-x-3">
+                              <div className={`inline-flex px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${getStatusColor(order.status)}`}>
+                                {formatStatus(order.status)}
+                              </div>
+                              {(order.status === 'pending' || order.status === 'confirmed') && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleCancelClick(order)
+                                  }}
+                                  disabled={cancelingOrderId === order.id}
+                                  className="text-red-600 hover:text-red-800 text-xs sm:text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+                                >
+                                  {cancelingOrderId === order.id ? 'Canceling...' : 'Cancel'}
+                                </button>
+                              )}
+                            </div>
+                            <p className="text-base sm:text-lg font-semibold text-gray-900">{formatPrice(order.total)}</p>
                           </div>
                         </div>
                       </div>
@@ -695,35 +770,37 @@ export default function Dashboard() {
                     <p className="mt-2 text-gray-600">Loading your service history...</p>
                   </div>
                 ) : orders.length > 0 ? (
-                  <div className="space-y-4">
+                  <div className="space-y-3 sm:space-y-4">
                     {orders.map((order) => (
-                      <div key={order.id} className="bg-white border border-gray-200 rounded-lg p-6">
-                        <div className="flex items-start justify-between">
+                      <div key={order.id} className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4 lg:p-6">
+                        <div className="flex flex-col lg:flex-row lg:items-start justify-between space-y-3 lg:space-y-0">
                           <div className="flex-1">
-                            <div className="flex items-center space-x-4">
+                            <div className="flex items-start space-x-3 sm:space-x-4">
                               <div className="flex-shrink-0">
-                                <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                                  <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                   </svg>
                                 </div>
                               </div>
-                              <div className="flex-1">
-                                <h4 className="text-lg font-semibold text-gray-900">
+                              <div className="flex-1 min-w-0">
+                                <h4 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 mb-2">
                                   Order #{order.id.slice(-8)} - {order.items?.[0]?.name || 'Service'}
                                 </h4>
-                                <p className="text-gray-600">
-                                  {formatDate(order.scheduled_date)} • {formatPrice(order.total)}
-                                </p>
-                                <p className="text-sm text-gray-500 capitalize">
-                                  Status: {formatStatus(order.status)}
-                                </p>
-                                <p className="text-sm text-gray-500">
-                                  Location: {order.location?.fullAddress}
-                                </p>
-                                <p className="text-sm text-gray-500">
-                                  Payment: {order.payment_method}
-                                </p>
+                                <div className="space-y-1 mb-3">
+                                  <p className="text-xs sm:text-sm lg:text-base text-gray-600">
+                                    {formatDate(order.scheduled_date)} • {formatPrice(order.total)}
+                                  </p>
+                                  <p className="text-xs sm:text-sm text-gray-500 capitalize">
+                                    Status: {formatStatus(order.status)}
+                                  </p>
+                                  <p className="text-xs sm:text-sm text-gray-500 truncate">
+                                    Location: {order.location?.fullAddress}
+                                  </p>
+                                  <p className="text-xs sm:text-sm text-gray-500">
+                                    Payment: {order.payment_method}
+                                  </p>
+                                </div>
                                 {order.notes && order.notes !== 'No notes' && (
                                   <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
                                     <div className="flex items-start space-x-2">
@@ -731,18 +808,18 @@ export default function Dashboard() {
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                       </svg>
                                       <div>
-                                        <p className="text-sm font-medium text-gray-700 mb-1">Admin Notes:</p>
-                                        <p className="text-sm text-gray-600">{order.notes}</p>
+                                        <p className="text-xs sm:text-sm font-medium text-gray-700 mb-1">Admin Notes:</p>
+                                        <p className="text-xs sm:text-sm text-gray-600">{order.notes}</p>
                                       </div>
                                     </div>
                                   </div>
                                 )}
                               </div>
-                              <div className="text-right">
-                                <div className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
-                                  {formatStatus(order.status)}
-                                </div>
-                              </div>
+                            </div>
+                          </div>
+                          <div className="flex-shrink-0 sm:text-right">
+                            <div className={`inline-flex px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${getStatusColor(order.status)}`}>
+                              {formatStatus(order.status)}
                             </div>
                           </div>
                         </div>
@@ -827,6 +904,121 @@ export default function Dashboard() {
               >
                 {cancelingOrderId === orderToCancel?.id ? 'Canceling...' : 'Yes, Cancel'}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Appointment Details Modal */}
+      {showAppointmentModal && selectedAppointment && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-semibold text-gray-900">Appointment Details</h3>
+                <button
+                  onClick={closeAppointmentModal}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <div className="space-y-6">
+                {/* Service Information */}
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h4 className="font-semibold text-gray-900 mb-3">Service Information</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Service:</span>
+                      <span className="font-medium">{selectedAppointment.items?.[0]?.name || 'Service'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Date:</span>
+                      <span className="font-medium">{formatDate(selectedAppointment.scheduled_date)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Time:</span>
+                      <span className="font-medium">{formatTime(selectedAppointment.scheduled_time)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Total:</span>
+                      <span className="font-medium text-gold">{formatPrice(selectedAppointment.total)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Status:</span>
+                      <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(selectedAppointment.status)}`}>
+                        {formatStatus(selectedAppointment.status)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Location Information */}
+                {selectedAppointment.location?.fullAddress && (
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h4 className="font-semibold text-gray-900 mb-3">Location</h4>
+                    <div className="flex items-start space-x-2">
+                      <svg className="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      <p className="text-gray-700">{selectedAppointment.location.fullAddress}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Payment Information */}
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h4 className="font-semibold text-gray-900 mb-3">Payment Information</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Payment Method:</span>
+                      <span className="font-medium">{selectedAppointment.payment_method}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Order ID:</span>
+                      <span className="font-medium text-sm">#{selectedAppointment.id.slice(-8)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Admin Notes */}
+                {selectedAppointment.notes && selectedAppointment.notes !== 'No notes' && (
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h4 className="font-semibold text-gray-900 mb-3">Admin Notes</h4>
+                    <div className="flex items-start space-x-2">
+                      <svg className="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                      <p className="text-gray-700">{selectedAppointment.notes}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="flex space-x-3 pt-4">
+                  <button
+                    onClick={closeAppointmentModal}
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+                  >
+                    Close
+                  </button>
+                  {(selectedAppointment.status === 'pending' || selectedAppointment.status === 'confirmed') && (
+                    <button
+                      onClick={() => {
+                        closeAppointmentModal()
+                        handleCancelClick(selectedAppointment)
+                      }}
+                      className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
+                    >
+                      Cancel Appointment
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>

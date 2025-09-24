@@ -57,7 +57,12 @@ export default function LocationSelector({ onLocationSelected }) {
     if (user?.id) {
       const saved = localStorage.getItem(`savedLocations_${user.id}`)
       if (saved) {
-        setSavedLocations(JSON.parse(saved))
+        try {
+          const parsed = JSON.parse(saved)
+          setSavedLocations(parsed)
+        } catch (error) {
+          console.error('Error parsing saved locations:', error)
+        }
       }
     }
   }, [user])
@@ -101,6 +106,8 @@ export default function LocationSelector({ onLocationSelected }) {
   const handleSaveLocation = () => {
     if (!isValid || !locationName.trim()) return
 
+    if (!user?.id) return
+
     const newLocation = {
       id: Date.now().toString(),
       name: locationName.trim(),
@@ -119,7 +126,6 @@ export default function LocationSelector({ onLocationSelected }) {
     setSavedLocations(updatedLocations)
     localStorage.setItem(`savedLocations_${user.id}`, JSON.stringify(updatedLocations))
     setLocationName('')
-    alert('Location saved successfully!')
   }
 
   // Load a saved location
@@ -176,12 +182,13 @@ export default function LocationSelector({ onLocationSelected }) {
 
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6">
+    <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Service Location</h2>
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Service Location</h2>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+
 
         {/* Saved Locations */}
         {savedLocations.length > 0 && (
@@ -259,7 +266,7 @@ export default function LocationSelector({ onLocationSelected }) {
         </div>
 
         {/* City and State Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-2">
               City *

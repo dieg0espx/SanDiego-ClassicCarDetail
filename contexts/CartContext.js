@@ -10,7 +10,8 @@ const CART_ACTIONS = {
   UPDATE_QUANTITY: 'UPDATE_QUANTITY',
   CLEAR_CART: 'CLEAR_CART',
   SET_LOCATION: 'SET_LOCATION',
-  SET_CUSTOMER_INFO: 'SET_CUSTOMER_INFO'
+  SET_CUSTOMER_INFO: 'SET_CUSTOMER_INFO',
+  UPDATE_TOTAL: 'UPDATE_TOTAL'
 }
 
 // Initial state
@@ -76,6 +77,12 @@ function cartReducer(state, action) {
       return {
         ...state,
         customerInfo: action.payload
+      }
+
+    case CART_ACTIONS.UPDATE_TOTAL:
+      return {
+        ...state,
+        total: action.payload
       }
 
     default:
