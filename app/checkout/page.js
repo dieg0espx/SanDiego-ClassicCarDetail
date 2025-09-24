@@ -145,6 +145,27 @@ export default function Checkout() {
 
       console.log('Order created successfully:', order)
 
+      // Send booking confirmation emails
+      try {
+        const emailResponse = await fetch('/api/send-booking-email', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ orderId: order.id }),
+        })
+
+        if (emailResponse.ok) {
+          console.log('Booking confirmation emails sent successfully')
+        } else {
+          console.error('Failed to send booking confirmation emails')
+          // Don't block the flow if email fails
+        }
+      } catch (emailError) {
+        console.error('Error sending booking confirmation emails:', emailError)
+        // Don't block the flow if email fails
+      }
+
       // Simulate payment processing
       await new Promise(resolve => setTimeout(resolve, 2000))
       
