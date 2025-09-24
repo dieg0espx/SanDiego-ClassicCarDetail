@@ -82,6 +82,18 @@ export default function DateTimePicker({ onDateTimeSelected, selectedDate, selec
     }
   }, [refreshTrigger, selectedDateState])
 
+  // Periodic refresh of availability to catch real-time changes
+  useEffect(() => {
+    if (!selectedDateState) return
+
+    // Refresh availability every 30 seconds when a date is selected
+    const interval = setInterval(() => {
+      checkAvailability(selectedDateState)
+    }, 30000) // 30 seconds
+
+    return () => clearInterval(interval)
+  }, [selectedDateState])
+
   const checkAvailability = async (date) => {
     setIsLoadingAvailability(true)
     setAvailabilityError(null)
@@ -90,9 +102,10 @@ export default function DateTimePicker({ onDateTimeSelected, selectedDate, selec
       
       const { data: existingBookings, error } = await supabase
         .from('orders')
-        .select('scheduled_time, status, customer_info, items')
+        .select('scheduled_time, status, customer_info, items, created_at')
         .eq('scheduled_date', date)
         .in('status', ['pending', 'confirmed', 'in_progress'])
+        .order('created_at', { ascending: false }) // Get most recent bookings first
 
       if (error) {
         console.error('❌ Error checking availability:', error)
@@ -102,23 +115,42 @@ export default function DateTimePicker({ onDateTimeSelected, selectedDate, selec
 
       if (showDebug) console.log('📅 Existing bookings found:', existingBookings)
 
-      // Create a set of booked time slots
+      // Create a set of booked time slots with additional info
       const bookedTimes = new Set()
+      const bookingDetails = new Map() // Store booking details for debugging
+      
       existingBookings?.forEach(booking => {
         if (booking.scheduled_time) {
           // Normalize time format - convert HH:MM:SS to HH:MM
           const normalizedTime = booking.scheduled_time.substring(0, 5) // Take only HH:MM part
           if (showDebug) console.log('⏰ Adding booked time:', booking.scheduled_time, '-> normalized:', normalizedTime)
           bookedTimes.add(normalizedTime)
+          bookingDetails.set(normalizedTime, {
+            customer: booking.customer_info?.firstName || 'Unknown',
+            status: booking.status,
+            createdAt: booking.created_at
+          })
         }
       })
 
-      if (showDebug) console.log('🚫 Booked time slots:', Array.from(bookedTimes))
+      if (showDebug) {
+        console.log('🚫 Booked time slots:', Array.from(bookedTimes))
+        console.log('📋 Booking details:', Object.fromEntries(bookingDetails))
+      }
+      
       setBookedSlots(bookedTimes)
       
-      // Clear selected time if it becomes booked
+      // Clear selected time if it becomes booked and show warning
       if (selectedTimeState && bookedTimes.has(selectedTimeState)) {
         if (showDebug) console.log('⚠️ Selected time is now booked, clearing selection')
+        const bookingInfo = bookingDetails.get(selectedTimeState)
+        const customerName = bookingInfo?.customer || 'Another customer'
+        
+        // Show a more informative message
+        if (showDebug) {
+          console.log(`⚠️ Time slot ${selectedTimeState} was just booked by ${customerName}`)
+        }
+        
         setSelectedTimeState('')
         if (onDateTimeSelected) {
           onDateTimeSelected({ date: selectedDateState, time: '' })
@@ -141,6 +173,11 @@ export default function DateTimePicker({ onDateTimeSelected, selectedDate, selec
   }
 
   const handleTimeChange = (time) => {
+    // Don't allow selection of booked slots
+    if (bookedSlots.has(time)) {
+      return
+    }
+    
     setSelectedTimeState(time)
     if (onDateTimeSelected && selectedDateState) {
       onDateTimeSelected({ date: selectedDateState, time })
@@ -236,7 +273,19 @@ export default function DateTimePicker({ onDateTimeSelected, selectedDate, selec
       {/* Time Selection */}
       {selectedDateState && (
         <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Choose a Time</h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">Choose a Time</h3>
+            <div className="flex items-center space-x-4 text-xs text-gray-500">
+              <div className="flex items-center">
+                <div className="w-3 h-3 bg-gray-100 border border-gray-300 rounded mr-1"></div>
+                <span>Booked</span>
+              </div>
+              <div className="flex items-center">
+                <div className="w-3 h-3 bg-gold border border-gold rounded mr-1"></div>
+                <span>Selected</span>
+              </div>
+            </div>
+          </div>
           
           {isLoadingAvailability ? (
             <div className="flex items-center justify-center py-8">
@@ -262,27 +311,66 @@ export default function DateTimePicker({ onDateTimeSelected, selectedDate, selec
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3">
-              {availableTimes
-                .filter(time => !bookedSlots.has(time.value)) // Hide booked slots completely
-                .map((time) => {
+            <>
+              {bookedSlots.size === availableTimes.length ? (
+              <div className="text-center py-8">
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+                  <svg className="w-12 h-12 text-yellow-400 mx-auto mb-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  <h4 className="text-lg font-medium text-yellow-800 mb-2">All Time Slots Booked</h4>
+                  <p className="text-yellow-700 mb-4">
+                    Unfortunately, all time slots for this date are already booked. 
+                    Please select a different date.
+                  </p>
+                  <button
+                    onClick={() => {
+                      setSelectedDateState('')
+                      setSelectedTimeState('')
+                      if (onDateTimeSelected) {
+                        onDateTimeSelected({ date: '', time: '' })
+                      }
+                    }}
+                    className="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                  >
+                    Choose Different Date
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3">
+                {availableTimes.map((time) => {
                   const isSelected = selectedTimeState === time.value
+                  const isBooked = bookedSlots.has(time.value)
                   
                   return (
                     <button
                       key={time.value}
-                      onClick={() => handleTimeChange(time.value)}
-                      className={`p-2 sm:p-3 text-center rounded-lg border-2 transition-all text-sm sm:text-base ${
-                        isSelected
+                      onClick={() => !isBooked && handleTimeChange(time.value)}
+                      disabled={isBooked}
+                      className={`p-2 sm:p-3 text-center rounded-lg border-2 transition-all text-sm sm:text-base relative ${
+                        isBooked
+                          ? 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed'
+                          : isSelected
                           ? 'border-gold bg-gold text-white'
                           : 'border-gray-200 hover:border-gold/50 hover:bg-gray-50'
                       }`}
+                      title={isBooked ? 'This time slot is already booked' : ''}
                     >
                       <div className="font-medium">{time.label}</div>
+                      {isBooked && (
+                        <div className="absolute top-1 right-1">
+                          <svg className="w-3 h-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                      )}
                     </button>
                   )
                 })}
-            </div>
+              </div>
+            )}
+            </>
           )}
         </div>
       )}
@@ -316,17 +404,17 @@ export default function DateTimePicker({ onDateTimeSelected, selectedDate, selec
             <div><strong>Booked Slots:</strong> {Array.from(bookedSlots).join(', ') || 'None'}</div>
             <div><strong>Total Booked:</strong> {bookedSlots.size}</div>
             <div><strong>Available Times:</strong> {availableTimes.length}</div>
-            <div className="mt-2 p-2 bg-white rounded border">
-              <strong>Time Slot Status:</strong>
-              <div className="text-xs">
-                <div>Total Available: {availableTimes.length}</div>
-                <div>Booked (Hidden): {bookedSlots.size}</div>
-                <div>Shown to User: {availableTimes.length - bookedSlots.size}</div>
+              <div className="mt-2 p-2 bg-white rounded border">
+                <strong>Time Slot Status:</strong>
+                <div className="text-xs">
+                  <div>Total Time Slots: {availableTimes.length}</div>
+                  <div>Booked (Disabled): {bookedSlots.size}</div>
+                  <div>Available: {availableTimes.length - bookedSlots.size}</div>
+                </div>
+                <div className="mt-2 text-xs text-gray-500">
+                  <strong>Disabled Slots:</strong> {Array.from(bookedSlots).join(', ') || 'None'}
+                </div>
               </div>
-              <div className="mt-2 text-xs text-gray-500">
-                <strong>Hidden Slots:</strong> {Array.from(bookedSlots).join(', ') || 'None'}
-              </div>
-            </div>
           </div>
         </div>
       )}

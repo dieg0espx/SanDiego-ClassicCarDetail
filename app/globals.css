@@ -48,13 +48,13 @@ video, img {
   
   /* Removed problematic CSS selector */
   
-  /* Disable all transforms on mobile to prevent movement, except animations, header, and slick carousel */
-  *:not(.animate-scroll):not(.animate-scroll *):not(.animate-scroll-left):not(.animate-scroll-left *):not(.animate-scroll-right):not(.animate-scroll-right *):not(header):not(header *):not(.slick-slider):not(.slick-slider *):not(.slick-track):not(.slick-track *):not(.slick-slide):not(.slick-slide *) {
+  /* Disable all transforms on mobile to prevent movement, except animations and header */
+  *:not(.animate-scroll):not(.animate-scroll *):not(.animate-scroll-left):not(.animate-scroll-left *):not(.animate-scroll-right):not(.animate-scroll-right *):not(header):not(header *) {
     transform: none !important;
   }
   
-  /* Ensure no element can cause horizontal overflow, except header and slick carousel */
-  *:not(header):not(header *):not(.slick-slider):not(.slick-slider *):not(.slick-track):not(.slick-track *) {
+  /* Ensure no element can cause horizontal overflow, except header */
+  *:not(header):not(header *) {
     max-width: 100vw !important;
   }
 }
@@ -76,35 +76,9 @@ video, img {
   
   /* Ensure header works properly on mobile */
   header {
-    position: sticky !important;
+    position: fixed !important;
     top: 0 !important;
     z-index: 50 !important;
-  }
-  
-  /* Ensure header transparency works on mobile */
-  header.bg-transparent,
-  header[class*="bg-transparent"] {
-    background: transparent !important;
-    background-color: transparent !important;
-    backdrop-filter: none !important;
-    border: none !important;
-    box-shadow: none !important;
-  }
-  
-  body:not(.scrolled) header {
-    background: transparent !important;
-    background-color: transparent !important;
-    backdrop-filter: none !important;
-  }
-  
-  /* Override any Tailwind mobile classes that might interfere */
-  @media (max-width: 640px) {
-    header.bg-transparent,
-    header[style*="transparent"] {
-      background: transparent !important;
-      background-color: transparent !important;
-      background-image: none !important;
-    }
   }
 }
 
@@ -127,24 +101,7 @@ video, img {
   }
 }
 
-/* Ensure header colors work properly */
-header.bg-transparent {
-  background-color: transparent !important;
-  backdrop-filter: none !important;
-}
-
-/* Removed problematic CSS selector */
-
-/* Enhanced sticky navigation */
-header {
-  position: sticky !important;
-  top: 0 !important;
-  z-index: 50 !important;
-  width: 100% !important;
-  transition: all 0.3s ease !important;
-}
-
-/* Ensure header is always fixed at top */
+/* Header styles */
 header {
   position: fixed !important;
   top: 0 !important;
@@ -152,6 +109,7 @@ header {
   right: 0 !important;
   z-index: 50 !important;
   width: 100% !important;
+  transition: all 0.3s ease !important;
 }
 
 /* Add padding to body to account for fixed header */
@@ -163,105 +121,6 @@ body {
   body {
     padding-top: 70px !important;
   }
-}
-
-/* Mobile header improvements */
-@media (max-width: 640px) {
-  header {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    z-index: 50 !important;
-    width: 100% !important;
-  }
-}
-
-/* Force transparency with highest specificity */
-header.bg-transparent,
-header[class*="bg-transparent"],
-header[style*="transparent"] {
-  background: transparent !important;
-  background-color: transparent !important;
-  background-image: none !important;
-  backdrop-filter: none !important;
-  border-bottom: none !important;
-  box-shadow: none !important;
-}
-
-/* Nuclear option - force transparency on all header elements */
-header {
-  background: transparent !important;
-  background-color: transparent !important;
-  background-image: none !important;
-}
-
-/* Override when scrolled */
-body.scrolled header {
-  background: rgba(0, 0, 0, 0.8) !important;
-  background-color: rgba(0, 0, 0, 0.8) !important;
-}
-
-/* Force transparency on home page - most aggressive approach */
-body:not(.scrolled) header,
-html:not(.scrolled) header,
-header:not(.scrolled) {
-  background: transparent !important;
-  background-color: transparent !important;
-  background-image: none !important;
-  background-attachment: scroll !important;
-  background-clip: border-box !important;
-  background-origin: padding-box !important;
-  background-position: 0% 0% !important;
-  background-repeat: repeat !important;
-  background-size: auto !important;
-}
-
-/* Ensure header text is always visible */
-header {
-  color: white !important;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-}
-
-header * {
-  color: inherit !important;
-}
-
-/* Add text shadow for better visibility on transparent header */
-header.bg-transparent * {
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
-}
-
-
-/* Override any conflicting background styles */
-header.bg-transparent,
-header[class*="bg-transparent"] {
-  background-color: transparent !important;
-  background: transparent !important;
-}
-
-/* Force transparency on home page header */
-body:not(.scrolled) header.bg-transparent,
-header.bg-transparent,
-header[class*="bg-transparent"] {
-  background: transparent !important;
-  background-color: transparent !important;
-  backdrop-filter: none !important;
-  border: none !important;
-  box-shadow: none !important;
-}
-
-/* Ensure transparent header on home page */
-body:not(.scrolled) header {
-  background: transparent !important;
-  background-color: transparent !important;
-}
-
-
-/* Ensure proper black background when scrolled */
-body.scrolled header {
-  background: rgba(0, 0, 0, 0.8) !important;
-  background-color: rgba(0, 0, 0, 0.8) !important;
 }
 
 @keyframes scroll {

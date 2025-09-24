@@ -77,23 +77,8 @@ export default function Header() {
 
       {/* Main Navigation Bar */}
       <header 
-        className="text-white fixed top-0 left-0 right-0 z-50 transition-all duration-300 w-full lg:bg-transparent bg-black"
-        style={isHomePage && !isScrolled 
-          ? { 
-              backgroundColor: 'transparent',
-              background: 'transparent',
-              backdropFilter: 'none',
-              borderBottom: 'none',
-              boxShadow: 'none'
-            } 
-          : { 
-              backgroundColor: 'black',
-              background: 'rgb(0, 0, 0)',
-              backdropFilter: 'blur(12px)',
-              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)'
-            }
-        }
+        className="text-white fixed top-0 left-0 right-0 z-50 transition-all duration-300 w-full bg-black"
+       
       >
         <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-3 items-center py-3 sm:py-2">

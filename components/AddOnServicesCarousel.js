@@ -1,9 +1,5 @@
 'use client'
 
-import Slider from 'react-slick'
-import 'slick-carousel/slick/slick.css'
-import 'slick-carousel/slick/slick-theme.css'
-
 export default function AddOnServicesCarousel() {
   const addOnServices = [
     {
@@ -44,78 +40,50 @@ export default function AddOnServicesCarousel() {
     }
   ]
 
-  const sliderSettings = {
-    dots: true,
-    infinite: true,
-    speed: 500,
-    slidesToShow: 3,
-    slidesToScroll: 1,
-    autoplay: true,
-    autoplaySpeed: 3000,
-    arrows: false,
-    responsive: [
-      {
-        breakpoint: 1024,
-        settings: {
-          slidesToShow: 2,
-          slidesToScroll: 1,
-        }
-      },
-      {
-        breakpoint: 768,
-        settings: {
-          slidesToShow: 1,
-          slidesToScroll: 1,
-        }
-      }
-    ]
-  }
 
   return (
     <div className="px-4">
-      {/* Desktop/Tablet Slider */}
+      {/* Desktop/Tablet Grid Layout */}
       <div className="hidden md:block">
-        <Slider {...sliderSettings}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
           {addOnServices.map((service, index) => (
-            <div key={index} className="p-6">
-              <div className="bg-white border border-gray-100 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 h-[400px] group hover:-translate-y-1 flex flex-col">
-                {/* Icon Section */}
-                <div className="flex justify-center mb-6">
-                  <div className="w-16 h-16 bg-gradient-to-br from-gold to-gold rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={service.icon} />
-                    </svg>
+            <div key={index} className="bg-white border border-gray-100 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 h-[400px] group hover:-translate-y-1 flex flex-col">
+              {/* Icon Section */}
+              <div className="flex justify-center mb-6">
+                <div className="w-16 h-16 bg-gradient-to-br from-gold to-gold rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={service.icon} />
+                  </svg>
+                </div>
+              </div>
+              
+              {/* Content Section */}
+              <div className="text-center h-[280px] flex flex-col">
+                <h3 className="text-xl font-bold text-black mb-4 leading-tight h-[4rem] flex items-center justify-center">
+                  {service.title}
+                </h3>
+                
+                <div className="mb-4 h-[4rem]">
+                  <div className={`font-bold text-gold ${service.price.includes('Quote') ? 'text-2xl' : 'text-4xl'}`}>
+                    {service.price}
                   </div>
+                  {!service.price.includes('Quote') && (
+                    <div className="text-sm text-gray-600 mt-1">Additional fee</div>
+                  )}
                 </div>
                 
-                {/* Content Section */}
-                <div className="text-center h-[280px] flex flex-col">
-                  <h3 className="text-xl font-bold text-black mb-4 leading-tight h-[4rem] flex items-center justify-center">
-                    {service.title}
-                  </h3>
-                  
-                  <div className="mb-4 h-[4rem]">
-                    <div className={`font-bold text-gold ${service.price.includes('Quote') ? 'text-2xl' : 'text-4xl'}`}>
-                      {service.price}
-                    </div>
-                    {!service.price.includes('Quote') && (
-                      <div className="text-sm text-gray-600 mt-1">Additional fee</div>
-                    )}
-                  </div>
-                  
-                  <p className="text-gray-600 leading-relaxed h-[100px] flex items-center justify-center">
-                    {service.description}
-                  </p>
-                </div>
-                
-                {/* Decorative Element */}
-                <div className="mt-6 flex justify-center">
-                  <div className="w-12 h-1 bg-gold rounded-full group-hover:bg-gold/80 transition-colors duration-300"></div>
-                </div>
+                <p className="text-gray-600 leading-relaxed h-[100px] flex items-center justify-center">
+                  {service.description}
+                </p>
+              </div>
+              
+              {/* Decorative Element */}
+              <div className="mt-6 flex justify-center">
+                <div className="w-12 h-1 bg-gold rounded-full group-hover:bg-gold/80 transition-colors duration-300"></div>
               </div>
             </div>
           ))}
-        </Slider>
+        </div>
       </div>
 
       {/* Mobile Layout - Each service on its own row */}

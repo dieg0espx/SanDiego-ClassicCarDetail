@@ -103,6 +103,46 @@ export default function Checkout() {
         return
       }
 
+      // Final availability check to prevent overbooking
+      if (selectedDateTime.date && selectedDateTime.time) {
+        console.log('🔍 Performing final availability check...')
+        
+        const { data: existingBookings, error: availabilityError } = await supabase
+          .from('orders')
+          .select('id, scheduled_time, status, customer_info')
+          .eq('scheduled_date', selectedDateTime.date)
+          .eq('scheduled_time', selectedDateTime.time)
+
+        if (availabilityError) {
+          console.error('❌ Error checking final availability:', availabilityError)
+          alert('Unable to verify appointment availability. Please try again.')
+          setIsProcessing(false)
+          return
+        }
+
+        if (existingBookings && existingBookings.length > 0) {
+          console.log('❌ Time slot is no longer available:', existingBookings)
+          
+          // Get the conflicting booking info for better error message
+          const conflictingBooking = existingBookings[0]
+          const customerName = conflictingBooking.customer_info?.firstName || 'Another customer'
+          
+          alert(`Sorry, this time slot is no longer available. ${customerName} has already booked this time slot. Please select a different time.`)
+          
+          // Reset to step 2 to allow user to select a new time
+          setCurrentStep(2)
+          setSelectedDateTime({ date: selectedDateTime.date, time: '' })
+          setIsProcessing(false)
+          
+          // Scroll to top and refresh availability
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+          setRefreshTrigger(prev => prev + 1)
+          return
+        }
+        
+        console.log('✅ Time slot is available, proceeding with order creation...')
+      }
+
       // Create order in Supabase
       const serviceAreaCost = location?.serviceAreaCost || 0
       const finalTotal = total + serviceAreaCost

@@ -50,6 +50,61 @@ export default function Services() {
     }
   ]
 
+  const additionalServices = [
+    {
+      id: 'paint-correction',
+      name: 'Paint Correction',
+      description: 'Remove swirls, scratches, and oxidation for a flawless finish',
+      price: 150,
+      image: '/stock/4.png',
+      features: [
+        'Multi-stage paint correction',
+        'Swirl mark removal',
+        'Oxidation treatment',
+        'Paint protection application'
+      ]
+    },
+    {
+      id: 'ceramic-coating',
+      name: 'Ceramic Coating',
+      description: 'Long-lasting protection with hydrophobic properties',
+      price: 300,
+      image: '/stock/5.png',
+      features: [
+        'Premium ceramic coating',
+        'Hydrophobic protection',
+        'UV resistance',
+        'Easy maintenance'
+      ]
+    },
+    {
+      id: 'interior-detailing',
+      name: 'Interior Detailing',
+      description: 'Deep cleaning and protection for all interior surfaces',
+      price: 120,
+      image: '/stock/6.png',
+      features: [
+        'Deep interior cleaning',
+        'Leather conditioning',
+        'Carpet shampooing',
+        'Dashboard protection'
+      ]
+    },
+    {
+      id: 'engine-bay-cleaning',
+      name: 'Engine Bay Cleaning',
+      description: 'Safe cleaning and dressing of your engine compartment',
+      price: 80,
+      image: '/stock/7.png',
+      features: [
+        'Safe engine cleaning',
+        'Degreasing treatment',
+        'Protective dressing',
+        'Component protection'
+      ]
+    }
+  ]
+
   const handleAddToCart = (service) => {
     addItem(service)
     setShowCartModal(true)
@@ -157,89 +212,31 @@ export default function Services() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {/* Paint Correction */}
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-              <div className="relative h-48">
-                <Image
-                  src="/stock/4.png"
-                  alt="Paint Correction Service"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-black mb-2">Paint Correction</h3>
-                <p className="text-gray-600 text-sm mb-4">Remove swirls, scratches, and oxidation for a flawless finish</p>
-                <div className="flex space-x-3">
-                  <a href="tel:(760) 518-8451" className="flex-1 bg-gold hover:bg-gold text-white text-center py-2 px-4 rounded-lg font-semibold transition-colors text-sm">
-                    Book Now
-                  </a>
+            {additionalServices.map((service) => (
+              <div key={service.id} className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+                <div className="relative h-48">
+                  <Image
+                    src={service.image}
+                    alt={`${service.name} Service`}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-black mb-2">{service.name}</h3>
+                  <div className="text-lg font-bold text-gold mb-2">${service.price}</div>
+                  <p className="text-gray-600 text-sm mb-4">{service.description}</p>
+                  <div className="flex space-x-3">
+                    <button 
+                      onClick={() => handleAddToCart(service)}
+                      className="flex-1 bg-gold hover:bg-gold text-white text-center py-2 px-4 rounded-lg font-semibold transition-colors text-sm"
+                    >
+                      Add to Cart
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-
-            {/* Ceramic Coating */}
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-              <div className="relative h-48">
-                <Image
-                  src="/stock/5.png"
-                  alt="Ceramic Coating Service"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-black mb-2">Ceramic Coating</h3>
-                <p className="text-gray-600 text-sm mb-4">Long-lasting protection with hydrophobic properties</p>
-                <div className="flex space-x-3">
-                  <a href="tel:(760) 518-8451" className="flex-1 bg-gold hover:bg-gold text-white text-center py-2 px-4 rounded-lg font-semibold transition-colors text-sm">
-                    Book Now
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            {/* Interior Detailing */}
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-              <div className="relative h-48">
-                <Image
-                  src="/stock/6.png"
-                  alt="Interior Detailing Service"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-black mb-2">Interior Detailing</h3>
-                <p className="text-gray-600 text-sm mb-4">Deep cleaning and protection for all interior surfaces</p>
-                <div className="flex space-x-3">
-                  <a href="tel:(760) 518-8451" className="flex-1 bg-gold hover:bg-gold text-white text-center py-2 px-4 rounded-lg font-semibold transition-colors text-sm">
-                    Book Now
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            {/* Engine Bay Cleaning */}
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-              <div className="relative h-48">
-                <Image
-                  src="/stock/7.png"
-                  alt="Engine Bay Cleaning Service"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-black mb-2">Engine Bay Cleaning</h3>
-                <p className="text-gray-600 text-sm mb-4">Safe cleaning and dressing of your engine compartment</p>
-                <div className="flex space-x-3">
-                  <a href="tel:(760) 518-8451" className="flex-1 bg-gold hover:bg-gold text-white text-center py-2 px-4 rounded-lg font-semibold transition-colors text-sm">
-                    Book Now
-                  </a>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>

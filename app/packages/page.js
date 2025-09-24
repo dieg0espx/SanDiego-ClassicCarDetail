@@ -1,9 +1,65 @@
+'use client'
+import { useState } from 'react'
 import Header from '../../components/Header'
 import Footer from '../../components/Footer'
 import AddOnServicesCarousel from '../../components/AddOnServicesCarousel'
 import CallToAction from '../../components/CallToAction'
+import CartModal from '../../components/cart/CartModal'
+import { useCart } from '../../contexts/CartContext'
 
 export default function Packages() {
+  const { addItem } = useCart()
+  const [showCartModal, setShowCartModal] = useState(false)
+
+  // Package data objects
+  const packages = [
+    {
+      id: 'classic-wash',
+      name: 'The Classic Wash',
+      description: 'Perfect for a quick, refreshing clean.',
+      price: 170,
+      image: '/stock/1.png',
+      features: [
+        'Two stage hand wash (prewash, contact wash)',
+        'Wheel cleaning, tires dressed',
+        'Light interior vacuum',
+        'Dashboard and console wipe down'
+      ]
+    },
+    {
+      id: 'sunset-shine',
+      name: 'The Sunset Shine',
+      description: 'Our most popular wash - a deeper clean with that SoCal sunset glow.',
+      price: 200,
+      image: '/stock/2.png',
+      features: [
+        'Everything in the classic wash',
+        'In depth interior vacuum and UV protectant wipe down (leather protection included)',
+        'Door jambs cleaned',
+        'Revitalizing Plastic dressing / protectant',
+        'Spray wax added for shine & protection'
+      ]
+    },
+    {
+      id: 'hot-rod-detail',
+      name: 'The Hot Rod Detail',
+      description: 'Inspired by classic show cars - for when you want your ride to turn heads.',
+      price: 270,
+      image: '/stock/3.png',
+      features: [
+        'Everything in the sunset shine',
+        'Three step hand wash and wax (Pre-wash, contact wash, hydro foam with wax sealant)',
+        'Detailed wheel & tire cleaning',
+        'Full in depth interior vacuum, shampoo, leather reconditioning'
+      ]
+    }
+  ]
+
+  const handleAddToCart = (packageData) => {
+    addItem(packageData)
+    setShowCartModal(true)
+  }
+
   return (
     <div className="min-h-screen bg-white">
 
@@ -35,143 +91,48 @@ export default function Packages() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* The Classic Wash */}
-            <div className="bg-white rounded-lg shadow-lg p-8 relative">
-              <div className="text-center">
-                <h3 className="text-2xl font-bold text-black mb-2">The Classic Wash</h3>
-                <div className="text-4xl font-bold text-gold mb-4">$170</div>
-                <p className="text-gray-600 mb-6">Perfect for a quick, refreshing clean.</p>
+            {packages.map((pkg, index) => (
+              <div 
+                key={pkg.id} 
+                className={`bg-white rounded-lg shadow-lg p-8 relative ${
+                  pkg.id === 'sunset-shine' ? 'border-2 border-gold' : ''
+                }`}
+              >
+                {pkg.id === 'sunset-shine' && (
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                    <span className="bg-gold text-white px-4 py-1 rounded-full text-sm font-semibold">
+                      Most Popular
+                    </span>
+                  </div>
+                )}
+                
+                <div className="text-center">
+                  <h3 className="text-2xl font-bold text-black mb-2">{pkg.name}</h3>
+                  <div className="text-4xl font-bold text-gold mb-4">${pkg.price}</div>
+                  <p className="text-gray-600 mb-6">{pkg.description}</p>
+                </div>
+                
+                <ul className="space-y-3 mb-8">
+                  {pkg.features.map((feature, featureIndex) => (
+                    <li key={featureIndex} className="flex items-start">
+                      <svg className="w-5 h-5 text-gold mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                      <span className="text-gray-700">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                
+                <div className="text-center">
+                  <button 
+                    onClick={() => handleAddToCart(pkg)}
+                    className="bg-gold hover:bg-gold text-white px-6 py-3 rounded-lg font-semibold transition-colors inline-block"
+                  >
+                    Add to Cart
+                  </button>
+                </div>
               </div>
-              
-              <ul className="space-y-3 mb-8">
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-gold mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">Two stage hand wash (prewash, contact wash)</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-gold mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">Wheel cleaning, tires dressed</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-gold mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">Light interior vacuum</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-gold mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">Dashboard and console wipe down</span>
-                </li>
-              </ul>
-              
-              <div className="text-center">
-                <a href="tel:(760) 518-8451" className="bg-gold hover:bg-gold text-white px-6 py-3 rounded-lg font-semibold transition-colors inline-block">
-                  Book Now
-                </a>
-              </div>
-            </div>
-
-            {/* The Sunset Shine */}
-            <div className="bg-white rounded-lg shadow-lg p-8 relative border-2 border-gold">
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                <span className="bg-gold text-white px-4 py-1 rounded-full text-sm font-semibold">
-                  Most Popular
-                </span>
-              </div>
-              
-              <div className="text-center">
-                <h3 className="text-2xl font-bold text-black mb-2">The Sunset Shine</h3>
-                <div className="text-4xl font-bold text-gold mb-4">$200</div>
-                <p className="text-gray-600 mb-6">Our most popular wash - a deeper clean with that SoCal sunset glow.</p>
-              </div>
-              
-              <ul className="space-y-3 mb-8">
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-gold mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">Everything in the classic wash</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-gold mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">In depth interior vacuum and UV protectant wipe down (leather protection included)</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-gold mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">Door jambs cleaned</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-gold mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">Revitalizing Plastic dressing / protectant</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-gold mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">Spray wax added for shine & protection</span>
-                </li>
-              </ul>
-              
-              <div className="text-center">
-                <a href="tel:(760) 518-8451" className="bg-gold hover:bg-gold text-white px-6 py-3 rounded-lg font-semibold transition-colors inline-block">
-                  Book Now
-                </a>
-              </div>
-            </div>
-
-            {/* The Hot Rod Detail */}
-            <div className="bg-white rounded-lg shadow-lg p-8 relative">
-              <div className="text-center">
-                <h3 className="text-2xl font-bold text-black mb-2">The Hot Rod Detail</h3>
-                <div className="text-4xl font-bold text-gold mb-4">$270</div>
-                <p className="text-gray-600 mb-6">Inspired by classic show cars - for when you want your ride to turn heads.</p>
-              </div>
-              
-              <ul className="space-y-3 mb-8">
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-gold mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">Everything in the sunset shine</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-gold mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">Three step hand wash and wax (Pre-wash, contact wash, hydro foam with wax sealant)</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-gold mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">Detailed wheel & tire cleaning</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-gold mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">Full in depth interior vacuum, shampoo, leather reconditioning</span>
-                </li>
-              </ul>
-              
-              <div className="text-center">
-                <a href="tel:(760) 518-8451" className="bg-gold hover:bg-gold text-white px-6 py-3 rounded-lg font-semibold transition-colors inline-block">
-                  Book Now
-                </a>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
@@ -289,6 +250,12 @@ export default function Packages() {
       </section>
 
       <CallToAction />
+      
+      {/* Cart Modal */}
+      <CartModal 
+        isOpen={showCartModal} 
+        onClose={() => setShowCartModal(false)} 
+      />
     </div>
   )
 }

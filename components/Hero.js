@@ -1,6 +1,6 @@
 export default function Hero() {
   return (
-    <section className="relative h-[calc(100vh+120px)] sm:h-[calc(100vh+120px)] flex items-center justify-center overflow-hidden rounded-b-[40px] -mt-[120px] w-full">
+    <section className="relative h-[calc(100vh+120px)] sm:h-[calc(100vh+120px)] flex items-center justify-center overflow-hidden rounded-b-[40px] -mt-20  w-full">
       {/* Background Video */}
       <video
         autoPlay
