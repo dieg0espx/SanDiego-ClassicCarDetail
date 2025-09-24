@@ -10,7 +10,7 @@ export default function AdminDashboard() {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState('overview')
   const [isAdmin, setIsAdmin] = useState(false)
-  const [currentDate, setCurrentDate] = useState(new Date(2025, 8, 1)) // September 2025
+  const [currentDate, setCurrentDate] = useState(new Date()) // Current date
   const [selectedDate, setSelectedDate] = useState(null)
   const [showAppointmentModal, setShowAppointmentModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
@@ -22,6 +22,7 @@ export default function AdminDashboard() {
   const [orderToComplete, setOrderToComplete] = useState(null)
   const [showUserModal, setShowUserModal] = useState(false)
   const [selectedUser, setSelectedUser] = useState(null)
+  const [calendarViewMode, setCalendarViewMode] = useState('calendar') // 'calendar' or 'list'
 
   // Fetch orders from Supabase
   const fetchOrders = async () => {
@@ -50,8 +51,8 @@ export default function AdminDashboard() {
       router.push('/')
     } else if (user) {
       // Check if user is admin
-      const adminEmail = 'aletxa.pascual@gmail.com'
-      if (user.email === adminEmail) {
+      const isUserAdmin = user.user_metadata?.role === 'admin' || user.email === 'admin@test.com'
+      if (isUserAdmin) {
         setIsAdmin(true)
         fetchOrders() // Fetch orders when admin loads
       } else {
@@ -753,19 +754,33 @@ export default function AdminDashboard() {
     orders.forEach(order => {
       if (order.items && order.items.length > 0) {
         order.items.forEach(item => {
-          const serviceName = item.name
-          serviceCounts[serviceName] = (serviceCounts[serviceName] || 0) + item.quantity
-          totalServices += item.quantity
+          // Normalize service names to remove duplicates
+          let serviceName = item.name || 'Unknown Service'
+          
+          // Standardize service names
+          if (serviceName.includes('Classic Wash') && !serviceName.includes('The')) {
+            serviceName = 'The Classic Wash'
+          } else if (serviceName.includes('Sunset Shine') && !serviceName.includes('The')) {
+            serviceName = 'The Sunset Shine'
+          } else if (serviceName.includes('Hot Rod Detail') && !serviceName.includes('The')) {
+            serviceName = 'The Hot Rod Detail'
+          }
+          
+          serviceCounts[serviceName] = (serviceCounts[serviceName] || 0) + (item.quantity || 1)
+          totalServices += (item.quantity || 1)
         })
       }
     })
 
     return Object.entries(serviceCounts)
-      .map(([service, count]) => ({
-        name: service,
-        count,
-        percentage: totalServices > 0 ? Math.round((count / totalServices) * 100) : 0
-      }))
+      .map(([service, count]) => {
+        const percentage = totalServices > 0 ? (count / totalServices) * 100 : 0
+        return {
+          name: service,
+          count,
+          percentage: parseFloat(percentage.toFixed(1)) // Keep 1 decimal place
+        }
+      })
       .sort((a, b) => b.count - a.count)
   }
 
@@ -891,18 +906,23 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 py-4 sm:py-8">
+      <style jsx>{`
+        nav::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-              <p className="text-gray-600 mt-2">Welcome back, {getUserDisplayName()}</p>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div className="mb-4 sm:mb-0">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+              <p className="text-gray-600 mt-1 sm:mt-2 text-sm sm:text-base">Welcome back, {getUserDisplayName()}</p>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 bg-gold rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-xl">
+            <div className="flex items-center justify-center sm:justify-end">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gold rounded-full flex items-center justify-center">
+                <span className="text-white font-bold text-lg sm:text-xl">
                   {getUserDisplayName().charAt(0).toUpperCase()}
                 </span>
               </div>
@@ -912,88 +932,91 @@ export default function AdminDashboard() {
 
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                <FiUsers className="w-6 h-6 text-gray-600" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <FiUsers className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
               </div>
-              <div className="ml-4">
-                <div className="text-2xl font-bold text-gray-900">{getUsersCount()}</div>
-                <div className="text-sm text-gray-500">
+              <div className="ml-3 sm:ml-4 min-w-0 flex-1">
+                <div className="text-xl sm:text-2xl font-bold text-gray-900 truncate">{getUsersCount()}</div>
+                <div className="text-xs sm:text-sm text-gray-500 truncate">
                   {getUsersCount() === 0 ? 'No users yet' : 'Total Users'}
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
               </div>
-              <div className="ml-4">
-                <div className="text-2xl font-bold text-gray-900">{orders.length}</div>
-                <div className="text-sm text-gray-500">Total Services</div>
+              <div className="ml-3 sm:ml-4 min-w-0 flex-1">
+                <div className="text-xl sm:text-2xl font-bold text-gray-900 truncate">{orders.length}</div>
+                <div className="text-xs sm:text-sm text-gray-500 truncate">Total Services</div>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                 </svg>
               </div>
-              <div className="ml-4">
-                <div className="text-2xl font-bold text-gray-900">{formatPrice(orders.reduce((total, order) => total + (order.total || 0), 0))}</div>
-                <div className="text-sm text-gray-500">Total Revenue</div>
+              <div className="ml-3 sm:ml-4 min-w-0 flex-1">
+                <div className="text-lg sm:text-2xl font-bold text-gray-900 truncate">{formatPrice(orders.reduce((total, order) => total + (order.total || 0), 0))}</div>
+                <div className="text-xs sm:text-sm text-gray-500 truncate">Total Revenue</div>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               </div>
-              <div className="ml-4">
-                <div className="text-2xl font-bold text-gray-900">{orders.filter(order => order.status === 'pending' && order.scheduled_date).length}</div>
-                <div className="text-sm text-gray-500">Pending Appointments</div>
+              <div className="ml-3 sm:ml-4 min-w-0 flex-1">
+                <div className="text-xl sm:text-2xl font-bold text-gray-900 truncate">{orders.filter(order => order.status === 'pending' && order.scheduled_date).length}</div>
+                <div className="text-xs sm:text-sm text-gray-500 truncate">Pending Appointments</div>
               </div>
             </div>
           </div>
         </div>
 
         {/* Navigation Tabs */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6 sm:mb-8">
           <div className="border-b border-gray-200">
-            <nav className="flex space-x-8 px-6">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 ${
-                    activeTab === tab.id
-                      ? 'border-gold text-gold'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={tab.icon} />
-                  </svg>
-                  <span>{tab.label}</span>
-                </button>
-              ))}
+            <nav className="flex overflow-x-auto px-4 sm:px-6" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
+              <div className="flex space-x-2 sm:space-x-8 min-w-max">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`py-3 sm:py-4 px-2 sm:px-1 border-b-2 font-medium text-xs sm:text-sm flex items-center space-x-1 sm:space-x-2 whitespace-nowrap ${
+                      activeTab === tab.id
+                        ? 'border-gold text-gold'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    <svg className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={tab.icon} />
+                    </svg>
+                    <span className="hidden sm:inline">{tab.label}</span>
+                    <span className="sm:hidden">{tab.label.split(' ')[0]}</span>
+                  </button>
+                ))}
+              </div>
             </nav>
           </div>
 
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             {/* Overview Tab */}
             {activeTab === 'overview' && (
               <div className="space-y-8">
@@ -1072,7 +1095,7 @@ export default function AdminDashboard() {
                   <button
                     onClick={fetchOrders}
                     disabled={ordersLoading}
-                    className="bg-gold hover:bg-gold text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
+                    className="bg-gold hover:bg-gold text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50 min-h-[44px] touch-manipulation"
                   >
                     {ordersLoading ? 'Loading...' : 'Refresh'}
                   </button>
@@ -1088,84 +1111,160 @@ export default function AdminDashboard() {
                     <p className="text-gray-500">No orders found. Orders will appear here when customers complete checkout.</p>
                   </div>
                 ) : (
-                  <div className="bg-white shadow-sm rounded-lg overflow-hidden">
-                    <div className="overflow-x-auto">
-                      <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Items</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                          {orders.map((order) => (
-                            <tr key={order.id} className="hover:bg-gray-50">
-                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                #{order.id.slice(-8)}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                <div>
-                                  <div className="font-medium">{order.customer_info?.firstName} {order.customer_info?.lastName}</div>
-                                  <div className="text-gray-500">{order.customer_info?.email}</div>
-                                  <div className="text-gray-500">{order.customer_info?.phone}</div>
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 text-sm text-gray-900">
-                                <div>
-                                  <div className="font-medium">{order.location?.fullAddress}</div>
-                                  {order.location?.serviceAreaCost > 0 && (
-                                    <div className="text-gold text-xs">+${order.location.serviceAreaCost} {order.location.serviceAreaName}</div>
-                                  )}
-                                  {order.location?.serviceAreaCost === 0 && order.location?.serviceAreaName && (
-                                    <div className="text-green-600 text-xs">FREE - {order.location.serviceAreaName}</div>
-                                  )}
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 text-sm text-gray-900">
-                                <div className="space-y-1">
-                                  {order.items?.map((item, index) => (
-                                    <div key={index} className="flex justify-between">
-                                      <span>{item.name}</span>
-                                      <span className="text-gray-500">x{item.quantity}</span>
-                                    </div>
-                                  ))}
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                ${order.total?.toFixed(2)}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {new Date(order.created_at).toLocaleDateString()}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {order.status !== 'completed' && order.status !== 'cancelled' && (
-                                  <button
-                                    onClick={() => handleMarkCompleteClick(order)}
-                                    className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-md text-xs font-medium transition-colors"
-                                  >
-                                    Mark Complete
-                                  </button>
-                                )}
-                                {order.status === 'completed' && (
-                                  <span className="text-green-600 text-xs font-medium">
-                                    ✓ Completed
-                                  </span>
-                                )}
-                                {order.status === 'cancelled' && (
-                                  <span className="text-red-600 text-xs font-medium">
-                                    ✗ Cancelled
-                                  </span>
-                                )}
-                              </td>
+                  <div className="space-y-4">
+                    {/* Mobile Card View */}
+                    <div className="block sm:hidden space-y-4">
+                      {orders.map((order) => (
+                        <div key={order.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                          <div className="flex justify-between items-start mb-3">
+                            <div>
+                              <h3 className="font-semibold text-gray-900">#{order.id.slice(-8)}</h3>
+                              <p className="text-sm text-gray-600">
+                                {order.customer_info?.firstName} {order.customer_info?.lastName}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <div className="font-bold text-gray-900">${order.total?.toFixed(2)}</div>
+                              <div className={getStatusBadgeClasses(order.status)}>
+                                {formatStatus(order.status)}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-2 text-sm">
+                            <div>
+                              <span className="font-medium text-gray-700">Email:</span>
+                              <span className="ml-2 text-gray-900">{order.customer_info?.email}</span>
+                            </div>
+                            <div>
+                              <span className="font-medium text-gray-700">Phone:</span>
+                              <span className="ml-2 text-gray-900">{order.customer_info?.phone}</span>
+                            </div>
+                            <div>
+                              <span className="font-medium text-gray-700">Location:</span>
+                              <span className="ml-2 text-gray-900">{order.location?.fullAddress}</span>
+                            </div>
+                            <div>
+                              <span className="font-medium text-gray-700">Services:</span>
+                              <div className="mt-1">
+                                {order.items?.map((item, index) => (
+                                  <div key={index} className="flex justify-between">
+                                    <span className="text-gray-900">{item.name}</span>
+                                    <span className="text-gray-500">x{item.quantity}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                            <div>
+                              <span className="font-medium text-gray-700">Date:</span>
+                              <span className="ml-2 text-gray-900">{new Date(order.created_at).toLocaleDateString()}</span>
+                            </div>
+                          </div>
+                          
+                          <div className="mt-4 pt-3 border-t border-gray-100">
+                            {order.status !== 'completed' && order.status !== 'cancelled' && (
+                              <button
+                                onClick={() => handleMarkCompleteClick(order)}
+                                className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                              >
+                                Mark Complete
+                              </button>
+                            )}
+                            {order.status === 'completed' && (
+                              <div className="text-center text-green-600 text-sm font-medium py-2">
+                                ✓ Completed
+                              </div>
+                            )}
+                            {order.status === 'cancelled' && (
+                              <div className="text-center text-red-600 text-sm font-medium py-2">
+                                ✗ Cancelled
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Desktop Table View */}
+                    <div className="hidden sm:block bg-white shadow-sm rounded-lg overflow-hidden">
+                      <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Items</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-gray-200">
+                            {orders.map((order) => (
+                              <tr key={order.id} className="hover:bg-gray-50">
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                  #{order.id.slice(-8)}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                  <div>
+                                    <div className="font-medium">{order.customer_info?.firstName} {order.customer_info?.lastName}</div>
+                                    <div className="text-gray-500">{order.customer_info?.email}</div>
+                                    <div className="text-gray-500">{order.customer_info?.phone}</div>
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4 text-sm text-gray-900">
+                                  <div>
+                                    <div className="font-medium">{order.location?.fullAddress}</div>
+                                    {order.location?.serviceAreaCost > 0 && (
+                                      <div className="text-gold text-xs">+${order.location.serviceAreaCost} {order.location.serviceAreaName}</div>
+                                    )}
+                                    {order.location?.serviceAreaCost === 0 && order.location?.serviceAreaName && (
+                                      <div className="text-green-600 text-xs">FREE - {order.location.serviceAreaName}</div>
+                                    )}
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4 text-sm text-gray-900">
+                                  <div className="space-y-1">
+                                    {order.items?.map((item, index) => (
+                                      <div key={index} className="flex justify-between">
+                                        <span>{item.name}</span>
+                                        <span className="text-gray-500">x{item.quantity}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                  ${order.total?.toFixed(2)}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                  {new Date(order.created_at).toLocaleDateString()}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                  {order.status !== 'completed' && order.status !== 'cancelled' && (
+                                    <button
+                                      onClick={() => handleMarkCompleteClick(order)}
+                                      className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-md text-xs font-medium transition-colors"
+                                    >
+                                      Mark Complete
+                                    </button>
+                                  )}
+                                  {order.status === 'completed' && (
+                                    <span className="text-green-600 text-xs font-medium">
+                                      ✓ Completed
+                                    </span>
+                                  )}
+                                  {order.status === 'cancelled' && (
+                                    <span className="text-red-600 text-xs font-medium">
+                                      ✗ Cancelled
+                                    </span>
+                                  )}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -1175,89 +1274,250 @@ export default function AdminDashboard() {
             {/* Calendar Tab */}
             {activeTab === 'calendar' && (
               <div className="space-y-6">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <h3 className="text-lg font-semibold text-gray-900">Appointment Calendar</h3>
-                  <div className="flex items-center space-x-4">
+                  
+                  {/* View Mode Toggle */}
+                  <div className="flex items-center bg-gray-100 rounded-lg p-1">
                     <button
-                      onClick={() => navigateMonth(-1)}
-                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                      onClick={() => setCalendarViewMode('calendar')}
+                      className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                        calendarViewMode === 'calendar'
+                          ? 'bg-white text-gray-900 shadow-sm'
+                          : 'text-gray-600 hover:text-gray-900'
+                      }`}
                     >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      <svg className="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
+                      Calendar
                     </button>
-                    <h4 className="text-lg font-medium text-gray-900 min-w-[200px] text-center">
-                      {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                    </h4>
                     <button
-                      onClick={() => navigateMonth(1)}
-                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                      onClick={() => setCalendarViewMode('list')}
+                      className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                        calendarViewMode === 'list'
+                          ? 'bg-white text-gray-900 shadow-sm'
+                          : 'text-gray-600 hover:text-gray-900'
+                      }`}
                     >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      <svg className="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                       </svg>
+                      List
                     </button>
                   </div>
                 </div>
 
+                {calendarViewMode === 'calendar' && (
+                  <>
+                    {/* Month Navigation - Moved below header for mobile */}
+                    <div className="flex items-center justify-center space-x-2 sm:space-x-4">
+                      <button
+                        onClick={() => navigateMonth(-1)}
+                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors min-h-[44px] min-w-[44px] touch-manipulation flex items-center justify-center"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                      </button>
+                      <h4 className="text-base sm:text-lg font-medium text-gray-900 min-w-[180px] sm:min-w-[200px] text-center">
+                        {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                      </h4>
+                      <button
+                        onClick={() => navigateMonth(1)}
+                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors min-h-[44px] min-w-[44px] touch-manipulation flex items-center justify-center"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    </div>
+                  </>
+                )}
+
                 {/* Calendar Grid */}
-                <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                  <div className="grid grid-cols-7 bg-gray-50">
-                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                      <div key={day} className="p-4 text-center font-medium text-gray-500 border-r border-gray-200 last:border-r-0">
-                        {day}
-                      </div>
-                    ))}
-                  </div>
-                  <div className="grid grid-cols-7">
-                    {Array.from({ length: getFirstDayOfMonth(currentDate) }, (_, i) => (
-                      <div key={`empty-${i}`} className="h-40 border-r border-b border-gray-200 last:border-r-0"></div>
-                    ))}
-                    {Array.from({ length: getDaysInMonth(currentDate) }, (_, i) => {
-                      const day = i + 1
-                      const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day)
-                      const appointments = getAppointmentsForDate(date)
-                      const isToday = formatDate(date) === formatDate(new Date())
-                      
-                      return (
-                        <div
-                          key={day}
-                          onClick={() => handleDateClick(date)}
-                          className={`h-40 border-r border-b border-gray-200 last:border-r-0 p-2 cursor-pointer hover:bg-gray-50 transition-colors ${
-                            isToday ? 'bg-gold bg-opacity-10' : ''
-                          } ${appointments.length > 0 ? 'bg-blue-50' : ''}`}
-                        >
-                          <div className={`text-sm font-medium ${isToday ? 'text-gold' : 'text-gray-900'}`}>
-                            {day}
-                          </div>
-                          {appointments.length > 0 && (
-                            <div className="mt-1 space-y-1">
-                              {appointments.slice(0, 3).map(appointment => (
-                                <div
-                                  key={appointment.id}
-                                  className="text-xs bg-gold text-white px-2 py-1 rounded w-full"
-                                  title={`${appointment.customer} - ${appointment.service} - ${appointment.location}`}
-                                >
-                                  <div className="truncate">
-                                    {appointment.time} {appointment.customer}
-                                  </div>
-                                  <div className="truncate text-xs opacity-90">
-                                    {appointment.location}
-                                  </div>
-                                </div>
-                              ))}
-                              {appointments.length > 3 && (
-                                <div className="text-xs text-gray-500">
-                                  +{appointments.length - 3} more
-                                </div>
-                              )}
-                            </div>
-                          )}
+                {calendarViewMode === 'calendar' && (
+                  <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                    <div className="grid grid-cols-7 bg-gray-50">
+                      {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                        <div key={day} className="p-2 sm:p-4 text-center font-medium text-gray-500 border-r border-gray-200 last:border-r-0 text-xs sm:text-sm">
+                          {day}
                         </div>
-                      )
-                    })}
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-7">
+                      {Array.from({ length: getFirstDayOfMonth(currentDate) }, (_, i) => (
+                        <div key={`empty-${i}`} className="h-24 sm:h-48 border-r border-b border-gray-200 last:border-r-0"></div>
+                      ))}
+                      {Array.from({ length: getDaysInMonth(currentDate) }, (_, i) => {
+                        const day = i + 1
+                        const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day)
+                        const appointments = getAppointmentsForDate(date)
+                        const isToday = formatDate(date) === formatDate(new Date())
+                        
+                        return (
+                          <div
+                            key={day}
+                            onClick={() => handleDateClick(date)}
+                            className={`h-24 sm:h-48 border-r border-b border-gray-200 last:border-r-0 p-1 sm:p-2 cursor-pointer hover:bg-gray-50 transition-colors touch-manipulation flex flex-col ${
+                              isToday ? 'bg-gold bg-opacity-10' : ''
+                            } ${appointments.length > 0 ? 'bg-blue-50' : ''}`}
+                          >
+                            <div className={`text-xs sm:text-sm font-medium mb-1 flex-shrink-0 ${isToday ? 'text-gold' : 'text-gray-900'}`}>
+                              {day}
+                            </div>
+                            {appointments.length > 0 && (
+                              <div className="flex-1 space-y-0.5 sm:space-y-1 overflow-hidden">
+                                {appointments.slice(0, 3).map(appointment => (
+                                  <div
+                                    key={appointment.id}
+                                    className="text-xs bg-gold text-white px-1 sm:px-2 py-0.5 sm:py-1 rounded w-full cursor-pointer hover:bg-opacity-80 transition-colors flex-shrink-0"
+                                    title={`${appointment.customer} - ${appointment.service} - ${appointment.location}`}
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      handleDateClick(date)
+                                    }}
+                                  >
+                                    <div className="truncate text-xs font-medium">
+                                      {appointment.time}
+                                    </div>
+                                    <div className="truncate text-xs opacity-90 hidden sm:block">
+                                      {appointment.customer}
+                                    </div>
+                                  </div>
+                                ))}
+                                {appointments.length > 3 && (
+                                  <div className="text-xs text-gray-500 flex-shrink-0">
+                                    +{appointments.length - 3} more
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {/* List View */}
+                {calendarViewMode === 'list' && (
+                  <div className="space-y-4">
+                    {/* Month Navigation for List View */}
+                    <div className="flex items-center justify-center space-x-2 sm:space-x-4">
+                      <button
+                        onClick={() => navigateMonth(-1)}
+                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors min-h-[44px] min-w-[44px] touch-manipulation flex items-center justify-center"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                      </button>
+                      <h4 className="text-base sm:text-lg font-medium text-gray-900 min-w-[180px] sm:min-w-[200px] text-center">
+                        {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                      </h4>
+                      <button
+                        onClick={() => navigateMonth(1)}
+                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors min-h-[44px] min-w-[44px] touch-manipulation flex items-center justify-center"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    </div>
+
+                    {/* Appointments List */}
+                    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                      {(() => {
+                        const allAppointments = []
+                        const daysInMonth = getDaysInMonth(currentDate)
+                        
+                        for (let day = 1; day <= daysInMonth; day++) {
+                          const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day)
+                          const appointments = getAppointmentsForDate(date)
+                          
+                          if (appointments.length > 0) {
+                            allAppointments.push({
+                              date: date,
+                              appointments: appointments
+                            })
+                          }
+                        }
+                        
+                        return allAppointments.length > 0 ? (
+                          allAppointments.map(({ date, appointments }) => (
+                            <div key={date.toISOString()} className="border-b border-gray-200 last:border-b-0">
+                              <div className="p-4 bg-gray-50 border-b border-gray-200">
+                                <h4 className="font-semibold text-gray-900">
+                                  {date.toLocaleDateString('en-US', { 
+                                    weekday: 'long', 
+                                    month: 'long', 
+                                    day: 'numeric',
+                                    year: 'numeric'
+                                  })}
+                                </h4>
+                                <p className="text-sm text-gray-600">
+                                  {appointments.length} appointment{appointments.length !== 1 ? 's' : ''}
+                                </p>
+                              </div>
+                              <div className="divide-y divide-gray-200">
+                                {appointments.map(appointment => (
+                                  <div
+                                    key={appointment.id}
+                                    onClick={() => handleDateClick(date)}
+                                    className="p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                                  >
+                                    <div className="flex items-center justify-between">
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex items-center space-x-3">
+                                          <div className="flex-shrink-0">
+                                            <div className="w-2 h-2 bg-gold rounded-full"></div>
+                                          </div>
+                                          <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-medium text-gray-900 truncate">
+                                              {appointment.customer}
+                                            </p>
+                                            <p className="text-sm text-gray-600 truncate">
+                                              {appointment.service}
+                                            </p>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div className="flex-shrink-0 text-right">
+                                        <p className="text-sm font-medium text-gray-900">
+                                          {appointment.time}
+                                        </p>
+                                        <p className="text-xs text-gray-500">
+                                          ${appointment.amount}
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <div className="mt-2 text-xs text-gray-500">
+                                      <p className="truncate">{appointment.location}</p>
+                                      {appointment.notes && (
+                                        <p className="truncate mt-1">Notes: {appointment.notes}</p>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="p-8 text-center">
+                            <svg className="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <h3 className="text-lg font-medium text-gray-900 mb-2">No appointments</h3>
+                            <p className="text-gray-500">
+                              No appointments scheduled for {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}.
+                            </p>
+                          </div>
+                        )
+                      })()}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -1266,74 +1526,124 @@ export default function AdminDashboard() {
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-semibold text-gray-900">All Users</h3>
-                  <button className="bg-gold hover:bg-gold text-white font-medium px-4 py-2 rounded-lg transition-colors">
-                    Export Users
-                  </button>
                 </div>
 
-                <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Services</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {getUniqueUsers().length > 0 ? (
-                        getUniqueUsers().map((user) => (
-                          <tr key={user.id}>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="font-medium text-gray-900">
+                <div className="space-y-4">
+                  {/* Mobile Card View */}
+                  <div className="block sm:hidden space-y-4">
+                    {getUniqueUsers().length > 0 ? (
+                      getUniqueUsers().map((user) => (
+                        <div key={user.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                          <div className="flex justify-between items-start mb-3">
+                            <div>
+                              <h3 className="font-semibold text-gray-900">
                                 {user.first_name} {user.last_name}
+                              </h3>
+                              <p className="text-sm text-gray-600">{user.email}</p>
+                            </div>
+                            <button 
+                              onClick={() => handleViewUser(user)}
+                              className="text-gold hover:text-gold transition-colors text-sm font-medium px-3 py-1 border border-gold rounded-md"
+                            >
+                              View
+                            </button>
+                          </div>
+                          
+                          <div className="space-y-2 text-sm">
+                            <div>
+                              <span className="font-medium text-gray-700">Phone:</span>
+                              <span className="ml-2 text-gray-900">{user.phone || 'N/A'}</span>
+                            </div>
+                            <div>
+                              <span className="font-medium text-gray-700">Services:</span>
+                              <span className="ml-2 text-gray-900">{user.order_count}</span>
+                            </div>
+                            <div>
+                              <span className="font-medium text-gray-700">Joined:</span>
+                              <span className="ml-2 text-gray-900">{new Date(user.created_at).toLocaleDateString()}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-12">
+                        <div className="flex flex-col items-center">
+                          <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                            <FiUsers className="w-6 h-6 text-gray-400" />
+                          </div>
+                          <h3 className="text-lg font-semibold text-gray-900 mb-2">No Users Yet</h3>
+                          <p className="text-gray-500 mb-2">Users will appear here once customers start placing orders.</p>
+                          <p className="text-sm text-gray-400">The admin dashboard will show real-time data as your business grows.</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Desktop Table View */}
+                  <div className="hidden sm:block bg-white border border-gray-200 rounded-lg overflow-hidden">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Services</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {getUniqueUsers().length > 0 ? (
+                          getUniqueUsers().map((user) => (
+                            <tr key={user.id}>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="font-medium text-gray-900">
+                                  {user.first_name} {user.last_name}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-gray-900">{user.email}</div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-gray-900">{user.phone || 'N/A'}</div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-gray-900">
+                                  {user.order_count}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-gray-900">
+                                  {new Date(user.created_at).toLocaleDateString()}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <button 
+                                  onClick={() => handleViewUser(user)}
+                                  className="text-gold hover:text-gold transition-colors"
+                                >
+                                  View
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan="6" className="px-6 py-12 text-center">
+                              <div className="flex flex-col items-center">
+                                <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                  <FiUsers className="w-6 h-6 text-gray-400" />
+                                </div>
+                                <h3 className="text-lg font-semibold text-gray-900 mb-2">No Users Yet</h3>
+                                <p className="text-gray-500 mb-2">Users will appear here once customers start placing orders.</p>
+                                <p className="text-sm text-gray-400">The admin dashboard will show real-time data as your business grows.</p>
                               </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-gray-900">{user.email}</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-gray-900">{user.phone || 'N/A'}</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-gray-900">
-                                {user.order_count}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-gray-900">
-                                {new Date(user.created_at).toLocaleDateString()}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                              <button 
-                                onClick={() => handleViewUser(user)}
-                                className="text-gold hover:text-gold transition-colors"
-                              >
-                                View
-                              </button>
                             </td>
                           </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan="6" className="px-6 py-12 text-center">
-                            <div className="flex flex-col items-center">
-                              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                                <FiUsers className="w-6 h-6 text-gray-400" />
-                              </div>
-                              <h3 className="text-lg font-semibold text-gray-900 mb-2">No Users Yet</h3>
-                              <p className="text-gray-500 mb-2">Users will appear here once customers start placing orders.</p>
-                              <p className="text-sm text-gray-400">The admin dashboard will show real-time data as your business grows.</p>
-                            </div>
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             )}
@@ -1351,17 +1661,17 @@ export default function AdminDashboard() {
                 
 
                 {/* Charts and Analytics */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                   {/* Service Popularity */}
-                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                    <h4 className="font-semibold text-gray-900 mb-4">Service Popularity</h4>
-                    <div className="space-y-4">
+                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+                    <h4 className="font-semibold text-gray-900 mb-4 text-sm sm:text-base">Service Popularity</h4>
+                    <div className="space-y-3 sm:space-y-4">
                       {getServicePopularity().length > 0 ? (
                         getServicePopularity().map((service, index) => (
                           <div key={service.name} className="space-y-2">
                             <div className="flex justify-between items-center">
-                              <span className="text-sm font-medium text-gray-700">{service.name}</span>
-                              <span className="text-sm font-bold text-gray-900">{service.percentage}%</span>
+                              <span className="text-xs sm:text-sm font-medium text-gray-700 truncate pr-2">{service.name}</span>
+                              <span className="text-xs sm:text-sm font-bold text-gray-900 flex-shrink-0">{service.percentage}%</span>
                             </div>
                             <div className="w-full bg-gray-200 rounded-full h-2">
                               <div 
@@ -1375,16 +1685,16 @@ export default function AdminDashboard() {
                           </div>
                         ))
                       ) : (
-                        <div className="text-center py-8 text-gray-500">
-                          <p>No service data available</p>
+                        <div className="text-center py-6 sm:py-8 text-gray-500">
+                          <p className="text-sm sm:text-base">No service data available</p>
                         </div>
                       )}
                     </div>
                   </div>
 
                   {/* Monthly Revenue */}
-                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                    <h4 className="font-semibold text-gray-900 mb-4">Monthly Revenue</h4>
+                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+                    <h4 className="font-semibold text-gray-900 mb-4 text-sm sm:text-base">Monthly Revenue</h4>
                     {(() => {
                       const monthlyData = getMonthlyRevenue()
                       
@@ -1460,19 +1770,19 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Status Distribution and Recent Activity */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                   {/* Status Distribution */}
-                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                    <h4 className="font-semibold text-gray-900 mb-4">Order Status Distribution</h4>
+                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+                    <h4 className="font-semibold text-gray-900 mb-4 text-sm sm:text-base">Order Status Distribution</h4>
                     <div className="space-y-3">
                       {getStatusDistribution().map((status) => (
                         <div key={status.status} className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3">
-                            <div className={`w-3 h-3 rounded-full ${getStatusColor(status.status.toLowerCase().replace(' ', '_'))}`}></div>
-                            <span className="text-sm text-gray-700">{status.status}</span>
+                          <div className="flex items-center space-x-2 sm:space-x-3">
+                            <div className={`w-3 h-3 rounded-full ${getStatusColor(status.status.toLowerCase().replace(' ', '_'))} flex-shrink-0`}></div>
+                            <span className="text-xs sm:text-sm text-gray-700 truncate">{status.status}</span>
                           </div>
-                          <div className="text-right">
-                            <div className="text-sm font-bold text-gray-900">{status.count}</div>
+                          <div className="text-right flex-shrink-0">
+                            <div className="text-xs sm:text-sm font-bold text-gray-900">{status.count}</div>
                             <div className="text-xs text-gray-500">{status.percentage}%</div>
                           </div>
                         </div>
@@ -1481,19 +1791,19 @@ export default function AdminDashboard() {
                   </div>
 
                   {/* Recent Activity */}
-                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                    <h4 className="font-semibold text-gray-900 mb-4">Recent Activity</h4>
+                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+                    <h4 className="font-semibold text-gray-900 mb-4 text-sm sm:text-base">Recent Activity</h4>
                     <div className="space-y-3 max-h-64 overflow-y-auto">
                       {getRecentActivity().length > 0 ? (
                         getRecentActivity().map((activity) => (
                           <div key={activity.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
-                            <div className="flex-1">
-                              <div className="text-sm font-medium text-gray-900">{activity.customer}</div>
-                              <div className="text-xs text-gray-500">{activity.service}</div>
-                              <div className="text-xs text-gray-400">{activity.date} at {activity.time}</div>
+                            <div className="flex-1 min-w-0">
+                              <div className="text-xs sm:text-sm font-medium text-gray-900 truncate">{activity.customer}</div>
+                              <div className="text-xs text-gray-500 truncate">{activity.service}</div>
+                              <div className="text-xs text-gray-400 truncate">{activity.date} at {activity.time}</div>
                             </div>
-                            <div className="text-right">
-                              <div className="text-sm font-bold text-gray-900">{formatPrice(activity.amount)}</div>
+                            <div className="text-right flex-shrink-0 ml-2">
+                              <div className="text-xs sm:text-sm font-bold text-gray-900">{formatPrice(activity.amount)}</div>
                               <span className={`inline-flex px-2 py-0.5 text-xs font-semibold rounded-full ${getStatusColor(activity.status)}`}>
                                 {formatStatus(activity.status)}
                               </span>
@@ -1501,8 +1811,8 @@ export default function AdminDashboard() {
                           </div>
                         ))
                       ) : (
-                        <div className="text-center py-8 text-gray-500">
-                          <p>No recent activity</p>
+                        <div className="text-center py-6 sm:py-8 text-gray-500">
+                          <p className="text-sm sm:text-base">No recent activity</p>
                         </div>
                       )}
                     </div>
@@ -1516,11 +1826,11 @@ export default function AdminDashboard() {
 
       {/* Appointment Modal */}
       {showAppointmentModal && selectedDate && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-semibold text-gray-900">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+            <div className="p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 pr-2">
                   Appointments for {selectedDate.toLocaleDateString('en-US', { 
                     weekday: 'long', 
                     year: 'numeric', 
@@ -1530,7 +1840,7 @@ export default function AdminDashboard() {
                 </h3>
                 <button
                   onClick={() => setShowAppointmentModal(false)}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  className="text-gray-400 hover:text-gray-600 transition-colors p-1 -m-1"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1539,14 +1849,15 @@ export default function AdminDashboard() {
               </div>
 
               <div className="space-y-4">
-                {getAppointmentsForDate(selectedDate).map((appointment) => (
-                  <div key={appointment.id} className="border border-gray-200 rounded-lg p-4">
-                    <div className="flex items-start justify-between mb-3">
+                {getAppointmentsForDate(selectedDate).length > 0 ? (
+                  getAppointmentsForDate(selectedDate).map((appointment) => (
+                  <div key={appointment.id} className="border border-gray-200 rounded-lg p-3 sm:p-4">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-3 space-y-2 sm:space-y-0">
                       <div>
-                        <h4 className="font-semibold text-gray-900 text-lg">{appointment.customer}</h4>
-                        <p className="text-gray-600">{appointment.service}</p>
+                        <h4 className="font-semibold text-gray-900 text-base sm:text-lg">{appointment.customer}</h4>
+                        <p className="text-gray-600 text-sm sm:text-base">{appointment.service}</p>
                       </div>
-                      <div className="text-right">
+                      <div className="flex justify-between sm:flex-col sm:text-right sm:items-end">
                         <div className="text-lg font-semibold text-gray-900">${appointment.amount}</div>
                         <span className={getStatusBadgeClasses(appointment.status)}>
                           {capitalizeStatus(appointment.status)}
@@ -1554,49 +1865,51 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 text-sm">
                       <div>
                         <div className="flex items-center mb-2">
-                          <svg className="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-4 h-4 text-gray-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
                           <span className="font-medium text-gray-700">Time:</span>
                           <span className="ml-2 text-gray-900">{appointment.time}</span>
                         </div>
                         <div className="flex items-center mb-2">
-                          <svg className="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-4 h-4 text-gray-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                           </svg>
                           <span className="font-medium text-gray-700">Phone:</span>
-                          <span className="ml-2 text-gray-900">{appointment.phone}</span>
+                          <span className="ml-2 text-gray-900 break-all">{appointment.phone}</span>
                         </div>
                         <div className="flex items-center mb-2">
-                          <svg className="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-4 h-4 text-gray-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                           </svg>
                           <span className="font-medium text-gray-700">Email:</span>
-                          <span className="ml-2 text-gray-900">{appointment.email}</span>
+                          <span className="ml-2 text-gray-900 break-all">{appointment.email}</span>
                         </div>
-                        <div className="flex items-center">
-                          <svg className="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="flex items-start">
+                          <svg className="w-4 h-4 text-gray-400 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                           </svg>
-                          <span className="font-medium text-gray-700">Location:</span>
-                          <span className="ml-2 text-gray-900">{appointment.location}</span>
+                          <div>
+                            <span className="font-medium text-gray-700">Location:</span>
+                            <span className="ml-2 text-gray-900 block break-words">{appointment.location}</span>
+                          </div>
                         </div>
                       </div>
                       
                       <div>
                         <div className="mb-2">
                           <div className="flex items-center mb-2">
-                            <svg className="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-4 h-4 text-gray-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
                             <span className="font-medium text-gray-700">Notes:</span>
                           </div>
                           <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-                            <p className="text-gray-900 text-sm">
+                            <p className="text-gray-900 text-sm break-words">
                               {appointment.notes && appointment.notes !== 'No notes' 
                                 ? appointment.notes 
                                 : 'No notes added for this appointment'
@@ -1607,19 +1920,49 @@ export default function AdminDashboard() {
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-end space-x-3 mt-4 pt-4 border-t border-gray-100">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end space-y-2 sm:space-y-0 sm:space-x-3 mt-4 pt-4 border-t border-gray-100">
                       <button 
                         onClick={() => handleEditAppointment(appointment)}
                         className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
                       >
                         Edit
                       </button>
-                      <button className="px-4 py-2 text-sm font-medium text-white bg-gold hover:bg-gold rounded-lg transition-colors">
-                        Call Customer
-                      </button>
+                      <div className="flex flex-col">
+                        {appointment.phone && appointment.phone !== 'No phone' ? (
+                          <a 
+                            href={`tel:${appointment.phone}`}
+                            className="px-4 py-2 text-sm font-medium text-white bg-gold hover:bg-gold rounded-lg transition-colors text-center"
+                          >
+                            Call Customer
+                          </a>
+                        ) : (
+                          <>
+                            <button 
+                              disabled
+                              className="px-4 py-2 text-sm font-medium text-gray-400 bg-gray-200 rounded-lg cursor-not-allowed"
+                            >
+                              Call Customer
+                            </button>
+                            <p className="text-xs text-gray-500 mt-1 text-center">
+                              No phone number available
+                            </p>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
-                ))}
+                  ))
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">No Appointments</h3>
+                    <p className="text-gray-500">There are no appointments scheduled for this date.</p>
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center justify-end mt-6 pt-4 border-t border-gray-200">
@@ -1637,11 +1980,11 @@ export default function AdminDashboard() {
 
       {/* Edit Notes Modal */}
       {showEditModal && editingOrder && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-semibold text-gray-900">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 pr-2">
                   Edit Appointment Notes
                 </h3>
                 <button
@@ -1650,7 +1993,7 @@ export default function AdminDashboard() {
                     setEditingOrder(null)
                     setEditNotes('')
                   }}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  className="text-gray-400 hover:text-gray-600 transition-colors p-1 -m-1"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1708,14 +2051,14 @@ export default function AdminDashboard() {
 
       {/* Confirmation Modal */}
       {showConfirmModal && orderToComplete && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-gray-900">Confirm Service Completion</h3>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 pr-2">Confirm Service Completion</h3>
                 <button
                   onClick={handleCancelComplete}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  className="text-gray-400 hover:text-gray-600 transition-colors p-1 -m-1"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1766,14 +2109,14 @@ export default function AdminDashboard() {
 
       {/* User Details Modal */}
       {showUserModal && selectedUser && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-semibold text-gray-900">User Details</h3>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+            <div className="p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 pr-2">User Details</h3>
                 <button
                   onClick={handleCloseUserModal}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  className="text-gray-400 hover:text-gray-600 transition-colors p-1 -m-1"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

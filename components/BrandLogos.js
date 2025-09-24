@@ -33,22 +33,22 @@ const BrandLogos = () => {
           </p>
         </div>
         
-        <div className="relative -mx-2 sm:-mx-4">
+        <div className="relative -mx-2 sm:-mx-4 overflow-hidden">
           {/* Scrolling container */}
           <div className="flex animate-scroll">
             {duplicatedBrands.map((image, index) => (
               <div
                 key={`${image}-${index}`}
-                className="flex-shrink-0 mx-4 sm:mx-6 lg:mx-8 flex items-center justify-center"
-                style={{ width: '150px', height: '90px' }}
+                className="flex-shrink-0 mx-3 sm:mx-6 lg:mx-8 flex items-center justify-center"
+                style={{ width: '120px', height: '80px' }}
               >
-                <div className="relative w-full h-full grayscale hover:grayscale-0 transition-all duration-300 hover:scale-110">
+                <div className="relative w-full h-full grayscale sm:hover:grayscale-0 transition-all duration-300 sm:hover:scale-110">
                   <Image
                     src={`/brands/${image}`}
                     alt={`Brand logo ${index + 1}`}
                     fill
                     className="object-contain"
-                    sizes="(max-width: 640px) 150px, 200px"
+                    sizes="(max-width: 640px) 120px, 200px"
                   />
                 </div>
               </div>
@@ -61,26 +61,6 @@ const BrandLogos = () => {
       {/* Fade overlays */}
       <div className="absolute left-0 top-0 bottom-0 w-16 sm:w-32 lg:w-[200px] bg-gradient-to-r from-white to-transparent z-10 pointer-events-none"></div>
       <div className="absolute right-0 top-0 bottom-0 w-16 sm:w-32 lg:w-[200px] bg-gradient-to-l from-white to-transparent z-10 pointer-events-none"></div>
-      
-    
-      <style jsx>{`
-        @keyframes scroll {
-          0% {
-            transform: translateX(0);
-          }
-          100% {
-            transform: translateX(-50%);
-          }
-        }
-        
-        .animate-scroll {
-          animation: scroll 30s linear infinite;
-        }
-        
-        .animate-scroll:hover {
-          animation-play-state: paused;
-        }
-      `}</style>
     </section>
   );
 };

@@ -2,13 +2,14 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 
-export default function DateTimePicker({ onDateTimeSelected, selectedDate, selectedTime, onNext }) {
+export default function DateTimePicker({ onDateTimeSelected, selectedDate, selectedTime, onNext, refreshTrigger, showDebug = false }) {
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [availableTimes, setAvailableTimes] = useState([])
   const [selectedDateState, setSelectedDateState] = useState(selectedDate || '')
   const [selectedTimeState, setSelectedTimeState] = useState(selectedTime || '')
   const [bookedSlots, setBookedSlots] = useState(new Set())
   const [isLoadingAvailability, setIsLoadingAvailability] = useState(false)
+  const [availabilityError, setAvailabilityError] = useState(null)
 
   // Generate calendar data for current and next month
   const generateCalendarData = (date) => {
@@ -74,31 +75,58 @@ export default function DateTimePicker({ onDateTimeSelected, selectedDate, selec
     }
   }, [selectedDateState])
 
+  // Refresh availability when refreshTrigger changes (e.g., after a booking is made)
+  useEffect(() => {
+    if (refreshTrigger && selectedDateState) {
+      checkAvailability(selectedDateState)
+    }
+  }, [refreshTrigger, selectedDateState])
+
   const checkAvailability = async (date) => {
     setIsLoadingAvailability(true)
+    setAvailabilityError(null)
     try {
+      if (showDebug) console.log('🔍 Checking availability for date:', date)
+      
       const { data: existingBookings, error } = await supabase
         .from('orders')
-        .select('scheduled_time')
+        .select('scheduled_time, status, customer_info, items')
         .eq('scheduled_date', date)
         .in('status', ['pending', 'confirmed', 'in_progress'])
 
       if (error) {
-        console.error('Error checking availability:', error)
+        console.error('❌ Error checking availability:', error)
+        setAvailabilityError('Failed to check availability. Please try again.')
         return
       }
+
+      if (showDebug) console.log('📅 Existing bookings found:', existingBookings)
 
       // Create a set of booked time slots
       const bookedTimes = new Set()
       existingBookings?.forEach(booking => {
         if (booking.scheduled_time) {
-          bookedTimes.add(booking.scheduled_time)
+          // Normalize time format - convert HH:MM:SS to HH:MM
+          const normalizedTime = booking.scheduled_time.substring(0, 5) // Take only HH:MM part
+          if (showDebug) console.log('⏰ Adding booked time:', booking.scheduled_time, '-> normalized:', normalizedTime)
+          bookedTimes.add(normalizedTime)
         }
       })
 
+      if (showDebug) console.log('🚫 Booked time slots:', Array.from(bookedTimes))
       setBookedSlots(bookedTimes)
+      
+      // Clear selected time if it becomes booked
+      if (selectedTimeState && bookedTimes.has(selectedTimeState)) {
+        if (showDebug) console.log('⚠️ Selected time is now booked, clearing selection')
+        setSelectedTimeState('')
+        if (onDateTimeSelected) {
+          onDateTimeSelected({ date: selectedDateState, time: '' })
+        }
+      }
     } catch (error) {
-      console.error('Error checking availability:', error)
+      console.error('❌ Error checking availability:', error)
+      setAvailabilityError('Failed to check availability. Please try again.')
     } finally {
       setIsLoadingAvailability(false)
     }
@@ -148,29 +176,6 @@ export default function DateTimePicker({ onDateTimeSelected, selectedDate, selec
       <div className="mb-8">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Choose a Date</h3>
         
-        {/* Month Navigation */}
-        <div className="flex items-center justify-between mb-4">
-          <button
-            onClick={() => navigateMonth(-1)}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <h4 className="text-lg font-semibold text-gray-900">
-            {formatMonthYear(currentMonth)}
-          </h4>
-          <button
-            onClick={() => navigateMonth(1)}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-        </div>
-
         {/* Calendar Grid */}
         <div className="bg-white border border-gray-200 rounded-lg p-4">
           <div className="grid grid-cols-7 gap-1 mb-2">
@@ -186,7 +191,7 @@ export default function DateTimePicker({ onDateTimeSelected, selectedDate, selec
                 key={index}
                 onClick={() => day && !day.isPast && handleDateChange(day.value)}
                 disabled={!day || day.isPast}
-                className={`p-3 text-center rounded-lg transition-all ${
+                className={`p-3 sm:p-4 text-center rounded-lg transition-all min-h-[48px] sm:min-h-[56px] flex items-center justify-center ${
                   !day
                     ? 'invisible'
                     : day.isPast
@@ -203,6 +208,29 @@ export default function DateTimePicker({ onDateTimeSelected, selectedDate, selec
             ))}
           </div>
         </div>
+
+        {/* Month Navigation - Moved below calendar for mobile */}
+        <div className="flex items-center justify-between mt-4">
+          <button
+            onClick={() => navigateMonth(-1)}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors min-h-[44px] min-w-[44px] touch-manipulation flex items-center justify-center"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <h4 className="text-base sm:text-lg font-semibold text-gray-900 min-w-[180px] sm:min-w-[200px] text-center">
+            {formatMonthYear(currentMonth)}
+          </h4>
+          <button
+            onClick={() => navigateMonth(1)}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors min-h-[44px] min-w-[44px] touch-manipulation flex items-center justify-center"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       {/* Time Selection */}
@@ -215,32 +243,45 @@ export default function DateTimePicker({ onDateTimeSelected, selectedDate, selec
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gold"></div>
               <span className="ml-3 text-gray-600">Checking availability...</span>
             </div>
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-              {availableTimes.map((time) => {
-                const isBooked = bookedSlots.has(time.value)
-                const isSelected = selectedTimeState === time.value
-                
-                return (
-                  <button
-                    key={time.value}
-                    onClick={() => !isBooked && handleTimeChange(time.value)}
-                    disabled={isBooked}
-                    className={`p-3 text-center rounded-lg border-2 transition-all ${
-                      isBooked
-                        ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
-                        : isSelected
-                        ? 'border-gold bg-gold text-white'
-                        : 'border-gray-200 hover:border-gold/50 hover:bg-gray-50'
-                    }`}
+          ) : availabilityError ? (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <div className="flex items-center">
+                <svg className="w-5 h-5 text-red-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+                <div>
+                  <h4 className="text-sm font-medium text-red-800">Error</h4>
+                  <p className="text-sm text-red-700 mt-1">{availabilityError}</p>
+                  <button 
+                    onClick={() => checkAvailability(selectedDateState)}
+                    className="mt-2 text-sm text-red-600 hover:text-red-800 underline"
                   >
-                    <div className="font-medium">{time.label}</div>
-                    {isBooked && (
-                      <div className="text-xs text-gray-400 mt-1">Booked</div>
-                    )}
+                    Try again
                   </button>
-                )
-              })}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3">
+              {availableTimes
+                .filter(time => !bookedSlots.has(time.value)) // Hide booked slots completely
+                .map((time) => {
+                  const isSelected = selectedTimeState === time.value
+                  
+                  return (
+                    <button
+                      key={time.value}
+                      onClick={() => handleTimeChange(time.value)}
+                      className={`p-2 sm:p-3 text-center rounded-lg border-2 transition-all text-sm sm:text-base ${
+                        isSelected
+                          ? 'border-gold bg-gold text-white'
+                          : 'border-gray-200 hover:border-gold/50 hover:bg-gray-50'
+                      }`}
+                    >
+                      <div className="font-medium">{time.label}</div>
+                    </button>
+                  )
+                })}
             </div>
           )}
         </div>
@@ -260,6 +301,31 @@ export default function DateTimePicker({ onDateTimeSelected, selectedDate, selec
             </div>
             <div className="text-sm text-gray-600">
               {availableTimes.find(t => t.value === selectedTimeState)?.label}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Debug Panel - Only show when showDebug is true */}
+      {showDebug && selectedDateState && (
+        <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <h4 className="text-sm font-medium text-yellow-800 mb-2">Debug Info</h4>
+          <div className="text-xs text-yellow-700 space-y-1">
+            <div><strong>Selected Date:</strong> {selectedDateState}</div>
+            <div><strong>Selected Time:</strong> {selectedTimeState || 'None'}</div>
+            <div><strong>Booked Slots:</strong> {Array.from(bookedSlots).join(', ') || 'None'}</div>
+            <div><strong>Total Booked:</strong> {bookedSlots.size}</div>
+            <div><strong>Available Times:</strong> {availableTimes.length}</div>
+            <div className="mt-2 p-2 bg-white rounded border">
+              <strong>Time Slot Status:</strong>
+              <div className="text-xs">
+                <div>Total Available: {availableTimes.length}</div>
+                <div>Booked (Hidden): {bookedSlots.size}</div>
+                <div>Shown to User: {availableTimes.length - bookedSlots.size}</div>
+              </div>
+              <div className="mt-2 text-xs text-gray-500">
+                <strong>Hidden Slots:</strong> {Array.from(bookedSlots).join(', ') || 'None'}
+              </div>
             </div>
           </div>
         </div>

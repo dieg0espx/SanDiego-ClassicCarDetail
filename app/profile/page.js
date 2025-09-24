@@ -223,7 +223,6 @@ export default function Profile() {
       specialInstructions: ''
     })
     
-    setMessage({ type: 'success', text: 'Location saved successfully!' })
   }
 
   // Delete saved location
