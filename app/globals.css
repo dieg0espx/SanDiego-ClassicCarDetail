@@ -42,9 +42,7 @@ video, img {
     transform: none !important;
   }
   
-  .hover\\:bg-white\\/20:hover {
-    transform: none !important;
-  }
+  /* Removed problematic CSS selector */
   
   /* Disable all transforms on mobile to prevent movement, except animations and header */
   *:not(.animate-scroll):not(.animate-scroll *):not(.animate-scroll-left):not(.animate-scroll-left *):not(.animate-scroll-right):not(.animate-scroll-right *):not(header):not(header *) {
@@ -131,10 +129,7 @@ header.bg-transparent {
   backdrop-filter: none !important;
 }
 
-header.bg-black\/80 {
-  background-color: rgba(0, 0, 0, 0.8) !important;
-  backdrop-filter: blur(12px) !important;
-}
+/* Removed problematic CSS selector */
 
 /* Enhanced sticky navigation */
 header {
@@ -244,8 +239,7 @@ body:not(.scrolled) header {
 
 
 /* Ensure proper black background when scrolled */
-body.scrolled header,
-header.bg-black\/80 {
+body.scrolled header {
   background: rgba(0, 0, 0, 0.8) !important;
   background-color: rgba(0, 0, 0, 0.8) !important;
 }
