@@ -5,8 +5,8 @@ import { AuthProvider } from '../contexts/AuthContext'
 import { CartProvider } from '../contexts/CartContext'
 
 export const metadata = {
-  title: 'San Diego Classic Auto Detail - Mobile Detailing',
-  description: 'Professional mobile detailing services in San Diego. Premium car wash, detailing, and protection services for classic cars, luxury vehicles, and daily drivers.',
+  title: 'San Diego Classic Auto Detail',
+  description: 'Professional classic car detailing services in San Diego. Premium car wash, paint protection, and restoration for classic cars, luxury vehicles, and daily drivers.',
   keywords: 'mobile detailing, car wash, auto detail, San Diego, classic cars, luxury cars, ceramic coating, paint protection',
   authors: [{ name: 'San Diego Classic Auto Detail' }],
   creator: 'San Diego Classic Auto Detail',
@@ -14,8 +14,8 @@ export const metadata = {
   
   // OpenGraph metadata for social media sharing (WhatsApp, iMessage, Facebook, etc.)
   openGraph: {
-    title: 'San Diego Classic Auto Detail - Mobile Detailing',
-    description: 'Professional mobile detailing services in San Diego. Premium car wash, detailing, and protection services for classic cars, luxury vehicles, and daily drivers.',
+    title: 'San Diego Classic Auto Detail',
+    description: 'Professional classic car detailing services in San Diego. Premium car wash, paint protection, and restoration for classic cars, luxury vehicles, and daily drivers.',
     url: 'https://sandiegoclassiccardetail.com',
     siteName: 'San Diego Classic Auto Detail',
     images: [
@@ -33,8 +33,8 @@ export const metadata = {
   // Twitter Card metadata
   twitter: {
     card: 'summary_large_image',
-    title: 'San Diego Classic Auto Detail - Mobile Detailing',
-    description: 'Professional mobile detailing services in San Diego. Premium car wash, detailing, and protection services for classic cars, luxury vehicles, and daily drivers.',
+    title: 'San Diego Classic Auto Detail',
+    description: 'Professional classic car detailing services in San Diego. Premium car wash, paint protection, and restoration for classic cars, luxury vehicles, and daily drivers.',
     images: ['/openGraph.png'],
     creator: '@sandiegoclassiccardetail',
   },
