@@ -27,11 +27,17 @@ export default function ContactForm() {
     setSubmitStatus(null)
 
     try {
-      // Simulate form submission
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      // Here you would typically send the data to your backend
-      console.log('Form submitted:', formData)
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to send message')
+      }
       
       setSubmitStatus('success')
       setFormData({
@@ -42,6 +48,7 @@ export default function ContactForm() {
         message: ''
       })
     } catch (error) {
+      console.error('Error sending message:', error)
       setSubmitStatus('error')
     } finally {
       setIsSubmitting(false)

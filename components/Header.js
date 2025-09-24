@@ -6,7 +6,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { useCart } from '../contexts/CartContext'
 import AuthModal from './auth/AuthModal'
 import CartModal from './cart/CartModal'
-import { LuShoppingCart } from 'react-icons/lu'
+import { FiShoppingCart } from 'react-icons/fi'
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -221,7 +221,7 @@ export default function Header() {
                 onClick={() => setShowCartModal(true)}
                 className="relative text-white hover:text-gray-300 transition-colors"
               >
-                <LuShoppingCart className="w-6 h-6" />
+                <FiShoppingCart className="w-6 h-6" />
                 {getItemCount() > 0 && (
                   <span className="absolute -top-2 -right-2 bg-gold text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
                     {getItemCount()}
@@ -295,7 +295,7 @@ export default function Header() {
                     }}
                     className="flex items-center space-x-2 w-full text-left px-3 py-2 rounded-md text-base font-medium text-white hover:text-gray-300 hover:bg-gray-700 transition-colors"
                   >
-                    <LuShoppingCart className="w-5 h-5" />
+                    <FiShoppingCart className="w-5 h-5" />
                     <span>Cart ({getItemCount()})</span>
                   </button>
                 </div>

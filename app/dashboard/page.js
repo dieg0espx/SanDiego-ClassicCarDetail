@@ -313,7 +313,7 @@ export default function Dashboard() {
             {activeTab === 'overview' && (
               <div className="space-y-8">
                 {/* Quick Actions */}
-                <div>
+                {/* <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <a 
@@ -346,7 +346,7 @@ export default function Dashboard() {
                       <span>Contact Support</span>
                     </a>
                   </div>
-                </div>
+                </div> */}
 
                 {/* Next Service Due */}
                 {getNextAppointment() ? (
@@ -377,12 +377,12 @@ export default function Dashboard() {
                       <div>
                         <h3 className="text-xl font-semibold mb-2 text-gray-900">No Upcoming Services</h3>
                         <p className="text-gray-600">You don't have any scheduled services at the moment.</p>
-                        <a 
+                        {/* <a 
                           href="/services" 
                           className="mt-4 inline-block bg-gold text-white font-medium px-6 py-2 rounded-lg hover:bg-gold transition-colors"
                         >
                           Book Your First Service
-                        </a>
+                        </a> */}
                       </div>
                       <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center">
                         <svg className="w-10 h-10 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -422,12 +422,12 @@ export default function Dashboard() {
                   ) : (
                     <div className="text-center py-8">
                       <p className="text-gray-600">No orders yet. Book your first service!</p>
-                      <a 
+                      {/* <a 
                         href="/services" 
                         className="mt-4 inline-block bg-gold text-white font-medium px-6 py-2 rounded-lg hover:bg-gold transition-colors"
                       >
                         Browse Services
-                      </a>
+                      </a> */}
                     </div>
                   )}
                 </div>
@@ -462,12 +462,12 @@ export default function Dashboard() {
                         Calendar
                       </button>
                     </div>
-                    <a 
+                    {/* <a 
                       href="/services" 
                       className="bg-gold hover:bg-gold text-white font-medium px-4 py-2 rounded-lg transition-colors"
                     >
                       Book New Appointment
-                    </a>
+                    </a> */}
                   </div>
                 </div>
 
@@ -673,12 +673,12 @@ export default function Dashboard() {
                     </div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">No Upcoming Appointments</h3>
                     <p className="text-gray-600 mb-4">You don't have any scheduled appointments at the moment.</p>
-                    <a 
+                    {/* <a 
                       href="/services" 
                       className="bg-gold text-white font-medium px-6 py-2 rounded-lg hover:bg-gold transition-colors"
                     >
                       Book Your First Service
-                    </a>
+                    </a> */}
                   </div>
                 )}
               </div>
@@ -758,12 +758,12 @@ export default function Dashboard() {
                     </div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">No Service History</h3>
                     <p className="text-gray-600 mb-4">You haven't completed any services yet.</p>
-                    <a 
+                    {/* <a 
                       href="/services" 
                       className="bg-gold text-white font-medium px-6 py-2 rounded-lg hover:bg-gold transition-colors"
                     >
                       Book Your First Service
-                    </a>
+                    </a> */}
                   </div>
                 )}
               </div>
