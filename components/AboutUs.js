@@ -12,7 +12,9 @@ export default function AboutUs() {
     if (!containerRef.current) return;
     
     const rect = containerRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
+    // Handle both mouse and touch events
+    const clientX = e.clientX || (e.touches && e.touches[0] && e.touches[0].clientX);
+    const x = clientX - rect.left;
     const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
     
     if (animationRef.current) {
@@ -35,6 +37,24 @@ export default function AboutUs() {
   }, [isDragging, updateSliderPosition]);
 
   const handleMouseUp = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
+  // Touch event handlers for mobile
+  const handleTouchStart = useCallback((e) => {
+    e.preventDefault(); // Prevent scrolling while dragging
+    setIsDragging(true);
+    updateSliderPosition(e);
+  }, [updateSliderPosition]);
+
+  const handleTouchMove = useCallback((e) => {
+    if (!isDragging) return;
+    e.preventDefault(); // Prevent scrolling while dragging
+    updateSliderPosition(e);
+  }, [isDragging, updateSliderPosition]);
+
+  const handleTouchEnd = useCallback((e) => {
+    e.preventDefault();
     setIsDragging(false);
   }, []);
 
@@ -69,6 +89,8 @@ export default function AboutUs() {
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
           >
             {/* Before Image (Background) */}
             <div 
@@ -89,23 +111,31 @@ export default function AboutUs() {
             
             {/* Slider Line */}
             <div 
-              className="absolute top-0 bottom-0 w-1 bg-white shadow-lg z-10"
+              className="absolute top-0 bottom-0 w-0.5 bg-white shadow-lg z-10"
               style={{ left: `${sliderPosition}%`, transform: 'translateX(-50%)' }}
             ></div>
             
             {/* Slider Handle */}
             <div 
               className="absolute top-1/2 z-20 cursor-grab active:cursor-grabbing"
-              style={{ left: `${sliderPosition}%`, transform: 'translate(-50%, -50%)' }}
+              style={{ 
+                left: `${sliderPosition}%`, 
+                transform: 'translate(-50%, -50%)',
+                willChange: 'transform'
+              }}
               onMouseDown={handleMouseDown}
+              onTouchStart={handleTouchStart}
             >
-              <div className="w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-gold">
-                <div className="flex items-center space-x-1">
-                  <svg className="w-4 h-4 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              <div className="w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-gold relative -left-[22px] md:left-0">
+                {/* Center dot for better alignment reference */}
+                <div className="absolute w-1 h-1 bg-gold rounded-full"></div>
+                {/* Arrows */}
+                <div className="flex items-center justify-center w-full h-full">
+                  <svg className="w-3 h-3 text-gold mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
                   </svg>
-                  <svg className="w-4 h-4 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  <svg className="w-3 h-3 text-gold ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
                   </svg>
                 </div>
               </div>
