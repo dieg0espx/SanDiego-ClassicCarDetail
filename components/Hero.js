@@ -35,7 +35,7 @@ export default function Hero() {
         </div> */}
 
         {/* Main Heading */}
-        <h1 className="text-3xl xs:text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black uppercase tracking-tight mb-4 sm:mb-6 leading-tight">
+        <h1 className="text-3xl xs:text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black uppercase tracking-tight mb-4 sm:mb-6 leading-tight mt-16 md:mt-0">
           <span className="inline text-3xl xs:text-4xl sm:text-6xl md:text-7xl lg:text-8xl bg-gradient-to-r from-white via-gray-100 to-white bg-clip-text text-transparent animate-slide-up-delay-1">
             PRECISION
           </span>

@@ -7,47 +7,21 @@ import Testimonials from '../components/Testimonials'
 import FAQ from '../components/FAQ'
 import LoyaltyClub from '../components/LoyaltyClub'
 import ContactCTA from '../components/ContactCTA'
-import Pricing from '../components/PricingTable'
+import Pricing from '../components/Pricing'
 
 export default function Home() {
-
-  let age = 25
-
-console.log(`I'm ${age} years old`);
-
-
   return (
     <main className="min-h-screen overflow-x-hidden">
       <Hero />
-      
-       {/* Stats Section */}
        <Stats />
-
-      {/* About Us Section */}
       <AboutUs />
-
-      {/* Brand Logos Section */}
-      <BrandLogos />
-     
-
-      {/* Why Choose Us Section */}
+      <BrandLogos />     
       <WhyChooseUs />
-
       <Pricing />
-
-      {/* Testimonials Section */}
       <Testimonials />
-
-
-
-
-      {/* FAQ Section */}
       <FAQ />
-
       <ContactCTA />
-
-            {/* Loyalty Club Section */}
-            <LoyaltyClub />
+      <LoyaltyClub />
     </main>
   )
 }

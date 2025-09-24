@@ -18,10 +18,6 @@ export default function Header() {
   const { user, signOut, loading } = useAuth()
   const { getItemCount } = useCart()
 
-  // Debug logging
-  useEffect(() => {
-    console.log('Header - User state:', user?.email || 'No user', 'Loading:', loading)
-  }, [user, loading])
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen)
@@ -39,9 +35,6 @@ export default function Header() {
     return user?.email || 'User'
   }
 
-  const getUserPhone = () => {
-    return user?.user_metadata?.phone || ''
-  }
 
   const getUserEmail = () => {
     return user?.email || ''
@@ -76,68 +69,26 @@ export default function Header() {
     ? 'bg-black/30 backdrop-blur-md border-b border-white/10' 
     : 'bg-black/90 backdrop-blur-md border-b border-white/10'
 
-  // Debug logging
-  console.log('Header Debug:', { isHomePage, isScrolled, headerBgClass })
 
   return (
     <>
       {/* Top Information Bar - Desktop Only */}
-      <div className="bg-gold text-white shadow-lg hidden sm:block w-full">
-        <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Desktop Layout - Horizontal */}
-          <div className="flex items-center justify-between py-2 text-sm">
-            {/* Location - Left */}
-            <div className="flex items-center group">
-              <div className="flex items-center justify-center w-6 h-6 bg-white/20 rounded-full mr-2 sm:group-hover:bg-white/30 transition-colors">
-                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <span className="font-medium">Vista, CA 92081</span>
-            </div>
-
-            {/* Phone - Center */}
-            <div className="flex items-center group">
-              <div className="flex items-center justify-center w-6 h-6 bg-white/20 rounded-full mr-2 sm:group-hover:bg-white/30 transition-colors">
-                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 011.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
-                </svg>
-              </div>
-              <div className="flex items-center">
-                <span className="text-sm opacity-90 mr-2">Fleet Services:</span>
-                <a href="tel:+17605188451" className="font-semibold hover:text-yellow-200 transition-colors">
-                  (760) 518-8451
-                </a>
-              </div>
-            </div>
-
-            {/* Hours - Right */}
-            <div className="flex items-center group">
-              <div className="flex items-center justify-center w-6 h-6 bg-white/20 rounded-full mr-2 sm:group-hover:bg-white/30 transition-colors">
-                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <span className="font-medium">Open 7 Days: 8AM-6PM</span>
-            </div>
-          </div>
-        </div>
-      </div>
+     
 
       {/* Main Navigation Bar */}
       <header 
-        className="text-white sticky top-0 z-50 transition-all duration-300 w-full"
+        className="text-white fixed top-0 left-0 right-0 z-50 transition-all duration-300 w-full lg:bg-transparent bg-black"
         style={isHomePage && !isScrolled 
           ? { 
-              backgroundColor: 'rgba(0, 0, 0, 0.3)',
-              background: 'rgba(0, 0, 0, 0.3)',
-              backdropFilter: 'blur(8px)',
-              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-              boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)'
+              backgroundColor: 'transparent',
+              background: 'transparent',
+              backdropFilter: 'none',
+              borderBottom: 'none',
+              boxShadow: 'none'
             } 
           : { 
-              backgroundColor: 'rgba(0, 0, 0, 0.9)',
-              background: 'rgba(0, 0, 0, 0.9)',
+              backgroundColor: 'black',
+              background: 'rgb(0, 0, 0)',
               backdropFilter: 'blur(12px)',
               borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
               boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)'
@@ -145,9 +96,9 @@ export default function Header() {
         }
       >
         <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-3 sm:py-2">
+          <div className="grid grid-cols-2 md:grid-cols-3 items-center py-3 sm:py-2">
             {/* Logo */}
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 flex lg:justify-start justify-start">
               <a href="/" className="block hover:opacity-90 transition-opacity duration-200">
                 <Image
                   src="/logo.png"
@@ -159,8 +110,8 @@ export default function Header() {
               </a>
             </div>
 
-            {/* Desktop Navigation Links */}
-            <nav className="hidden lg:flex items-center space-x-8">
+            {/* Desktop Navigation Links - Center Column */}
+            <nav className="hidden lg:flex items-center space-x-8 justify-center">
               <a href="/" className="hover:text-gray-300 transition-colors">Home</a>
               <a href="/services" className="hover:text-gray-300 transition-colors">Services</a>
               <a href="/packages" className="hover:text-gray-300 transition-colors">Packages</a>
@@ -168,7 +119,7 @@ export default function Header() {
             </nav>
 
             {/* Desktop Call-to-Action Button & Auth */}
-            <div className="hidden lg:flex items-center space-x-4">
+            <div className="hidden lg:flex items-center space-x-8 flex-shrink-0 justify-end">
               {user ? (
                 <div className="relative">
                   <button
@@ -262,40 +213,14 @@ export default function Header() {
                   </span>
                 )}
               </button>
-              <a href="#quote" className="bg-white hover:bg-gray-100 text-gold font-bold px-6 py-2 rounded-lg transition-colors flex items-center space-x-2">
+              <a href="#quote" className="bg-gold hover:bg-gold/90 text-white font-bold px-6 py-2 rounded-lg transition-colors flex items-center space-x-2">
                 <i className="bi bi-calendar-check"></i>
                 <span>Book Now</span>
               </a>
             </div>
 
-            {/* Mobile Cart Icon & Menu Button */}
-            <div className="lg:hidden flex items-center space-x-1">
-              {/* Mobile Cart Icon */}
-              <button
-                onClick={() => setShowCartModal(true)}
-                className="relative p-2 rounded-md text-white hover:text-gray-300 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white transition-colors"
-              >
-                <FiShoppingCart className="w-5 h-5" />
-                {getItemCount() > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-gold text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-medium">
-                    {getItemCount()}
-                  </span>
-                )}
-              </button>
-
-              {/* Mobile Auth Button (if not logged in) */}
-              {!user && (
-                <button
-                  onClick={() => setShowAuthModal(true)}
-                  className="p-2 rounded-md text-white hover:text-gray-300 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white transition-colors"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </button>
-              )}
-
-              {/* Mobile Menu Button */}
+            {/* Mobile Menu Button - Only burger menu */}
+            <div className="lg:hidden flex items-center justify-end">
               <button
                 onClick={toggleMenu}
                 className="p-2 rounded-md text-white hover:text-gray-300 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white transition-colors"
@@ -315,108 +240,160 @@ export default function Header() {
             </div>
           </div>
 
-          {/* Mobile Navigation Menu */}
+          {/* Mobile Sidebar Menu */}
           {isMenuOpen && (
-            <div className="lg:hidden">
-              <div className={`px-2 pt-2 pb-3 space-y-1 sm:px-3 ${isHomePage && !isScrolled ? 'bg-black/30 backdrop-blur-md border border-white/20' : 'bg-black/50 backdrop-blur-md border border-white/20'} rounded-lg mt-2 shadow-lg`}>
-                <a
-                  href="/"
-                  className="block px-3 py-2.5 rounded-md text-base font-medium text-white hover:text-gray-300 hover:bg-white/10 transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Home
-                </a>
-                <a
-                  href="/services"
-                  className="block px-3 py-2.5 rounded-md text-base font-medium text-white hover:text-gray-300 hover:bg-white/10 transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Services
-                </a>
-                <a
-                  href="/packages"
-                  className="block px-3 py-2.5 rounded-md text-base font-medium text-white hover:text-gray-300 hover:bg-white/10 transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Packages
-                </a>
-                <a
-                  href="/contact"
-                  className="block px-3 py-2.5 rounded-md text-base font-medium text-white hover:text-gray-300 hover:bg-white/10 transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Contact
-                </a>
-
-                {/* Mobile Auth */}
-                {user ? (
-                  <div className="border-t border-white/20 pt-3 mt-3">
-                    <div className="px-3 py-2 text-white">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-gold rounded-full flex items-center justify-center">
-                          <span className="text-white font-semibold text-sm">
-                            {getUserDisplayName().charAt(0).toUpperCase()}
-                          </span>
-                        </div>
-                        <div className="flex-1">
-                          <div className="text-sm font-medium">{getUserDisplayName()}</div>
-                          {getUserEmail() && (
-                            <div className="text-xs opacity-75">{getUserEmail()}</div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    {(user?.user_metadata?.role === 'admin' || getUserEmail() === 'admin@test.com') ? (
-                      // Admin menu - only admin dashboard and sign out
-                      <a
-                        href="/admin"
-                        className="block w-full text-left px-3 py-2.5 rounded-md text-base font-medium text-gold hover:text-gray-300 hover:bg-white/10 transition-colors"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        🔐 Admin Dashboard
-                      </a>
-                    ) : (
-                      // Regular user menu
-                      <>
-                        <a
-                          href="/dashboard"
-                          className="block w-full text-left px-3 py-2.5 rounded-md text-base font-medium text-white hover:text-gray-300 hover:bg-white/10 transition-colors"
-                          onClick={() => setIsMenuOpen(false)}
-                        >
-                          Go to Dashboard
-                        </a>
-                        <a
-                          href="/profile"
-                          className="block w-full text-left px-3 py-2.5 rounded-md text-base font-medium text-white hover:text-gray-300 hover:bg-white/10 transition-colors"
-                          onClick={() => setIsMenuOpen(false)}
-                        >
-                          Edit Profile
-                        </a>
-                      </>
-                    )}
+            <>
+              {/* Backdrop */}
+              <div 
+                className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+                onClick={() => setIsMenuOpen(false)}
+              />
+              
+              {/* Sidebar */}
+              <div className="fixed top-0 right-0 h-full w-80 bg-black/95 backdrop-blur-md border-l border-white/10 z-50 lg:hidden transform transition-transform duration-300 ease-in-out">
+                <div className="flex flex-col h-full">
+                  {/* Sidebar Header */}
+                  <div className="flex items-center justify-between p-6 border-b border-white/10">
+                    <h2 className="text-xl font-semibold text-white">Menu</h2>
                     <button
-                      onClick={() => {
-                        handleSignOut()
-                        setIsMenuOpen(false)
-                      }}
-                      className="block w-full text-left px-3 py-2.5 rounded-md text-base font-medium text-white hover:text-gray-300 hover:bg-white/10 transition-colors"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="p-2 rounded-md text-white hover:text-gray-300 hover:bg-white/10 transition-colors"
                     >
-                      Sign Out
+                      <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
                     </button>
                   </div>
-                ) : (
-                  <button
-                    onClick={() => {
-                      setShowAuthModal(true)
-                      setIsMenuOpen(false)
-                    }}
-                    className="block w-full text-left px-3 py-2.5 rounded-md text-base font-medium text-white hover:text-gray-300 hover:bg-white/10 transition-colors"
-                  >
-                    Sign In
-                  </button>
-                )}
+                  
+                  {/* Navigation Links */}
+                  <nav className="flex-1 px-6 py-6 space-y-2">
+                    <a
+                      href="/"
+                      className="block px-4 py-3 rounded-lg text-lg font-medium text-white hover:text-gray-300 hover:bg-white/10 transition-colors"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Home
+                    </a>
+                    <a
+                      href="/services"
+                      className="block px-4 py-3 rounded-lg text-lg font-medium text-white hover:text-gray-300 hover:bg-white/10 transition-colors"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Services
+                    </a>
+                    <a
+                      href="/packages"
+                      className="block px-4 py-3 rounded-lg text-lg font-medium text-white hover:text-gray-300 hover:bg-white/10 transition-colors"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Packages
+                    </a>
+                    <a
+                      href="/contact"
+                      className="block px-4 py-3 rounded-lg text-lg font-medium text-white hover:text-gray-300 hover:bg-white/10 transition-colors"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Contact
+                    </a>
+                  </nav>
+                  
+                  {/* User Section */}
+                  <div className="border-t border-white/10 p-6">
+                    {user ? (
+                      <div className="space-y-4">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-gold rounded-full flex items-center justify-center">
+                            <span className="text-white font-semibold text-lg">
+                              {getUserDisplayName().charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+                          <div className="flex-1">
+                            <div className="text-lg font-medium text-white">{getUserDisplayName()}</div>
+                            {getUserEmail() && (
+                              <div className="text-sm text-gray-400">{getUserEmail()}</div>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          {(user?.user_metadata?.role === 'admin' || getUserEmail() === 'admin@test.com') ? (
+                            <a
+                              href="/admin"
+                              className="block w-full text-left px-4 py-3 rounded-lg text-lg font-medium text-gold hover:text-gray-300 hover:bg-white/10 transition-colors"
+                              onClick={() => setIsMenuOpen(false)}
+                            >
+                              🔐 Admin Dashboard
+                            </a>
+                          ) : (
+                            <>
+                              <a
+                                href="/dashboard"
+                                className="block w-full text-left px-4 py-3 rounded-lg text-lg font-medium text-white hover:text-gray-300 hover:bg-white/10 transition-colors"
+                                onClick={() => setIsMenuOpen(false)}
+                              >
+                                Go to Dashboard
+                              </a>
+                              <a
+                                href="/profile"
+                                className="block w-full text-left px-4 py-3 rounded-lg text-lg font-medium text-white hover:text-gray-300 hover:bg-white/10 transition-colors"
+                                onClick={() => setIsMenuOpen(false)}
+                              >
+                                Edit Profile
+                              </a>
+                            </>
+                          )}
+                          <button
+                            onClick={() => {
+                              handleSignOut()
+                              setIsMenuOpen(false)
+                            }}
+                            className="block w-full text-left px-4 py-3 rounded-lg text-lg font-medium text-white hover:text-gray-300 hover:bg-white/10 transition-colors"
+                          >
+                            Sign Out
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <button
+                          onClick={() => {
+                            setShowAuthModal(true)
+                            setIsMenuOpen(false)
+                          }}
+                          className="block w-full text-left px-4 py-3 rounded-lg text-lg font-medium text-white hover:text-gray-300 hover:bg-white/10 transition-colors"
+                        >
+                          Sign In
+                        </button>
+                        <button
+                          onClick={() => {
+                            setShowCartModal(true)
+                            setIsMenuOpen(false)
+                          }}
+                          className="flex items-center space-x-3 w-full text-left px-4 py-3 rounded-lg text-lg font-medium text-white hover:text-gray-300 hover:bg-white/10 transition-colors"
+                        >
+                          <FiShoppingCart className="w-6 h-6" />
+                          <span>Cart</span>
+                          {getItemCount() > 0 && (
+                            <span className="bg-gold text-white text-sm rounded-full h-6 w-6 flex items-center justify-center font-medium">
+                              {getItemCount()}
+                            </span>
+                          )}
+                        </button>
+                      </div>
+                    )}
+                    
+                    {/* Book Now Button */}
+                    <a 
+                      href="#quote" 
+                      className="block w-full bg-gold hover:bg-gold/90 text-white font-bold px-6 py-3 rounded-lg transition-colors text-center mt-4"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Book Now
+                    </a>
+                  </div>
+                </div>
               </div>
-            </div>
+            </>
           )}
         </div>
       </header>
