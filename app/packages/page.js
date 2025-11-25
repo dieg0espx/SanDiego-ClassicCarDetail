@@ -52,6 +52,20 @@ export default function Packages() {
         'Detailed wheel & tire cleaning',
         'Full in depth interior vacuum, shampoo, leather reconditioning'
       ]
+    },
+    {
+      id: 'monthly-maintenance',
+      name: 'Monthly Maintenance',
+      description: 'Keep your classic looking showroom-ready all year long with our monthly plan.',
+      price: 160,
+      image: '/stock/1.png',
+      features: [
+        'Monthly scheduled detailing service',
+        'Two stage hand wash with spray wax',
+        'Wheel & tire cleaning and dressing',
+        'Interior vacuum and wipe down',
+        'Priority booking for regular customers'
+      ]
     }
   ]
 
@@ -90,11 +104,11 @@ export default function Packages() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {packages.map((pkg, index) => (
-              <div 
-                key={pkg.id} 
-                className={`bg-white rounded-lg shadow-lg p-8 relative ${
+              <div
+                key={pkg.id}
+                className={`bg-white rounded-lg shadow-lg p-8 relative flex flex-col ${
                   pkg.id === 'sunset-shine' ? 'border-2 border-gold' : ''
                 }`}
               >
@@ -105,14 +119,17 @@ export default function Packages() {
                     </span>
                   </div>
                 )}
-                
+
                 <div className="text-center">
-                  <h3 className="text-2xl font-bold text-black mb-2">{pkg.name}</h3>
-                  <div className="text-4xl font-bold text-gold mb-4">${pkg.price}</div>
-                  <p className="text-gray-600 mb-6">{pkg.description}</p>
+                  <h3 className="text-2xl font-bold text-black mb-2 h-16 flex items-center justify-center">{pkg.name}</h3>
+                  <div className="text-4xl font-bold text-gold mb-4">
+                    ${pkg.price}
+                    {pkg.id === 'monthly-maintenance' && <span className="text-lg text-gray-600">/mo</span>}
+                  </div>
+                  <p className="text-gray-600 mb-6 h-12">{pkg.description}</p>
                 </div>
-                
-                <ul className="space-y-3 mb-8">
+
+                <ul className="space-y-3 mb-8 flex-grow">
                   {pkg.features.map((feature, featureIndex) => (
                     <li key={featureIndex} className="flex items-start">
                       <svg className="w-5 h-5 text-gold mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -122,9 +139,9 @@ export default function Packages() {
                     </li>
                   ))}
                 </ul>
-                
-                <div className="text-center">
-                  <button 
+
+                <div className="text-center mt-auto">
+                  <button
                     onClick={() => handleAddToCart(pkg)}
                     className="bg-gold hover:bg-gold text-white px-6 py-3 rounded-lg font-semibold transition-colors inline-block"
                   >

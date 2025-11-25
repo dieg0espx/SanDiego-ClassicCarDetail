@@ -23,6 +23,8 @@ export default function AdminDashboard() {
   const [showUserModal, setShowUserModal] = useState(false)
   const [selectedUser, setSelectedUser] = useState(null)
   const [calendarViewMode, setCalendarViewMode] = useState('calendar') // 'calendar' or 'list'
+  const [loyaltyEmails, setLoyaltyEmails] = useState([])
+  const [loyaltyLoading, setLoyaltyLoading] = useState(false)
 
   // Fetch orders from Supabase
   const fetchOrders = async () => {
@@ -46,6 +48,53 @@ export default function AdminDashboard() {
     }
   }
 
+  // Fetch loyalty club emails
+  const fetchLoyaltyEmails = async () => {
+    setLoyaltyLoading(true)
+    try {
+      const response = await fetch('/api/loyalty-club?admin=true')
+      const data = await response.json()
+
+      if (response.ok) {
+        setLoyaltyEmails(data.emails || [])
+      } else {
+        console.error('Error fetching loyalty emails:', data.error)
+      }
+    } catch (error) {
+      console.error('Error fetching loyalty emails:', error)
+    } finally {
+      setLoyaltyLoading(false)
+    }
+  }
+
+  // Export loyalty emails to CSV
+  const exportToCSV = () => {
+    if (loyaltyEmails.length === 0) {
+      alert('No emails to export')
+      return
+    }
+
+    const csvContent = [
+      ['Email', 'Subscribed Date'],
+      ...loyaltyEmails.map(item => [
+        item.email,
+        new Date(item.subscribed_at).toLocaleDateString()
+      ])
+    ].map(row => row.join(',')).join('\n')
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    const url = URL.createObjectURL(blob)
+
+    link.setAttribute('href', url)
+    link.setAttribute('download', `loyalty-club-emails-${new Date().toISOString().split('T')[0]}.csv`)
+    link.style.visibility = 'hidden'
+
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   useEffect(() => {
     if (!loading && !user) {
       router.push('/')
@@ -55,6 +104,7 @@ export default function AdminDashboard() {
       if (isUserAdmin) {
         setIsAdmin(true)
         fetchOrders() // Fetch orders when admin loads
+        fetchLoyaltyEmails() // Fetch loyalty club emails
       } else {
         router.push('/dashboard')
       }
@@ -561,25 +611,32 @@ export default function AdminDashboard() {
   const getAppointmentsForDate = (date) => {
     const dateStr = date.toISOString().split('T')[0]
     return orders
-      .filter(order => 
-        order.scheduled_date === dateStr && 
+      .filter(order =>
+        order.scheduled_date === dateStr &&
         order.scheduled_time &&
         order.status !== 'cancelled'
       )
-      .map(order => ({
-        id: order.id,
-        customer: `${order.customer_info?.firstName || ''} ${order.customer_info?.lastName || ''}`.trim() || 'Unknown Customer',
-        service: order.items?.[0]?.name || 'Service',
-        time: formatTime(order.scheduled_time),
-        amount: order.total || 0,
-        phone: order.customer_info?.phone || 'No phone',
-        email: order.customer_info?.email || 'No email',
-        notes: order.notes || 'No notes',
-        status: order.status || 'pending',
-        location: order.location?.fullAddress || 'No address',
-        serviceArea: order.location?.serviceAreaName || '',
-        scheduled_time: order.scheduled_time // Keep original time for sorting
-      }))
+      .map(order => {
+        // Try multiple field name formats (camelCase and snake_case)
+        const firstName = order.customer_info?.firstName || order.customer_info?.first_name || ''
+        const lastName = order.customer_info?.lastName || order.customer_info?.last_name || ''
+        const customerName = `${firstName} ${lastName}`.trim()
+
+        return {
+          id: order.id,
+          customer: customerName || order.customer_info?.email?.split('@')[0] || 'Unknown Customer',
+          service: order.items?.[0]?.name || 'Service',
+          time: formatTime(order.scheduled_time),
+          amount: order.total || 0,
+          phone: order.customer_info?.phone || 'No phone',
+          email: order.customer_info?.email || 'No email',
+          notes: order.notes || 'No notes',
+          status: order.status || 'pending',
+          location: order.location?.fullAddress || 'No address',
+          serviceArea: order.location?.serviceAreaName || '',
+          scheduled_time: order.scheduled_time // Keep original time for sorting
+        }
+      })
       .sort((a, b) => {
         // Sort by scheduled_time (HH:MM format)
         if (a.scheduled_time && b.scheduled_time) {
@@ -724,6 +781,7 @@ export default function AdminDashboard() {
     { id: 'orders', label: 'Services', icon: 'M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' },
     { id: 'calendar', label: 'Calendar', icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' },
     { id: 'users', label: 'Users', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z' },
+    { id: 'loyalty', label: 'Loyalty Club', icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
     { id: 'analytics', label: 'Analytics', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' }
   ]
 
@@ -1648,6 +1706,122 @@ export default function AdminDashboard() {
               </div>
             )}
 
+            {/* Loyalty Club Tab */}
+            {activeTab === 'loyalty' && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-gray-900">Loyalty Club Subscribers</h3>
+                  <button
+                    onClick={exportToCSV}
+                    disabled={loyaltyEmails.length === 0}
+                    className="inline-flex items-center px-4 py-2 bg-gold text-white font-semibold rounded-lg hover:bg-gold/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <svg className="w-5 h-5 mr-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Export as CSV
+                  </button>
+                </div>
+
+                {/* Stats Card */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+                  <div className="flex items-center">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <svg className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                      </svg>
+                    </div>
+                    <div className="ml-3 sm:ml-4 min-w-0 flex-1">
+                      <div className="text-xl sm:text-2xl font-bold text-gray-900 truncate">{loyaltyEmails.length}</div>
+                      <div className="text-xs sm:text-sm text-gray-500 truncate">Total Subscribers</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Emails Table */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                  {loyaltyLoading ? (
+                    <div className="flex items-center justify-center py-12">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold"></div>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subscribed Date</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Days Active</th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {loyaltyEmails.length > 0 ? (
+                            loyaltyEmails.map((item, index) => {
+                              const subscribedDate = new Date(item.subscribed_at)
+                              const daysActive = Math.floor((new Date() - subscribedDate) / (1000 * 60 * 60 * 24))
+
+                              return (
+                                <tr key={item.id} className="hover:bg-gray-50">
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {index + 1}
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap">
+                                    <div className="flex items-center">
+                                      <div className="flex-shrink-0 h-8 w-8 bg-gold rounded-full flex items-center justify-center">
+                                        <span className="text-sm font-semibold text-black">
+                                          {item.email.charAt(0).toUpperCase()}
+                                        </span>
+                                      </div>
+                                      <div className="ml-4">
+                                        <div className="text-sm font-medium text-gray-900">{item.email}</div>
+                                      </div>
+                                    </div>
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap">
+                                    <div className="text-sm text-gray-900">
+                                      {subscribedDate.toLocaleDateString('en-US', {
+                                        year: 'numeric',
+                                        month: 'short',
+                                        day: 'numeric'
+                                      })}
+                                    </div>
+                                    <div className="text-xs text-gray-500">
+                                      {subscribedDate.toLocaleTimeString('en-US', {
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                      })}
+                                    </div>
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap">
+                                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                      {daysActive} {daysActive === 1 ? 'day' : 'days'}
+                                    </span>
+                                  </td>
+                                </tr>
+                              )
+                            })
+                          ) : (
+                            <tr>
+                              <td colSpan="4" className="px-6 py-12 text-center">
+                                <div className="flex flex-col items-center">
+                                  <svg className="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                  </svg>
+                                  <p className="text-gray-500 font-medium">No subscribers yet</p>
+                                  <p className="text-sm text-gray-400 mt-1">Loyalty club subscribers will appear here</p>
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Analytics Tab */}
             {activeTab === 'analytics' && (
@@ -1707,9 +1881,7 @@ export default function AdminDashboard() {
                             <div className="space-y-4">
                               {monthlyData.map((month, index) => {
                                 const percentage = maxRevenue > 0 ? (month.revenue / maxRevenue) * 100 : 0
-                                const colors = ['bg-gold', 'bg-blue-500', 'bg-green-500', 'bg-amber-500', 'bg-red-500', 'bg-purple-500']
-                                const colorClass = colors[index % colors.length]
-                                
+
                                 return (
                                   <div key={index} className="space-y-2">
                                     <div className="flex justify-between items-center">
@@ -1720,9 +1892,9 @@ export default function AdminDashboard() {
                                       </div>
                                     </div>
                                     <div className="w-full bg-gray-200 rounded-full h-3">
-                                      <div 
-                                        className={`${colorClass} h-3 rounded-full transition-all duration-500 ease-out`}
-                                        style={{ 
+                                      <div
+                                        className="bg-gold h-3 rounded-full transition-all duration-500 ease-out"
+                                        style={{
                                           width: `${percentage}%`,
                                           animationDelay: `${index * 100}ms`
                                         }}

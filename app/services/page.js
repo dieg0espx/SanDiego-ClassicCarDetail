@@ -142,7 +142,7 @@ export default function Services() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             {services.map((service, index) => (
-              <div key={service.id} className={`bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow ${index === 1 ? 'border-2 border-gold' : ''}`}>
+              <div key={service.id} className={`bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow flex flex-col ${index === 1 ? 'border-2 border-gold' : ''}`}>
                 <div className="relative h-40 sm:h-48">
                   <Image
                     src={service.image}
@@ -158,11 +158,11 @@ export default function Services() {
                     </div>
                   )}
                 </div>
-                <div className="p-4 sm:p-6">
+                <div className="p-4 sm:p-6 flex flex-col flex-grow">
                   <h3 className="text-xl sm:text-2xl font-bold text-black mb-2">{service.name}</h3>
                   <div className="text-2xl sm:text-3xl font-bold text-gold mb-3 sm:mb-4">${service.price}</div>
                   <p className="text-gray-600 mb-4 text-sm sm:text-base">{service.description}</p>
-                  <ul className="space-y-2 mb-4 sm:mb-6">
+                  <ul className="space-y-2 mb-4 sm:mb-6 flex-grow">
                     {service.features.map((feature, featureIndex) => (
                       <li key={featureIndex} className="flex items-center text-xs sm:text-sm text-gray-700">
                         <svg className="w-3 h-3 sm:w-4 sm:h-4 text-gold mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -172,11 +172,11 @@ export default function Services() {
                       </li>
                     ))}
                   </ul>
-                  <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+                  <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 mt-auto">
                     <Link href={`/services/${service.id}`} className="flex-1 bg-gold hover:bg-gold text-white text-center py-2 sm:py-2 px-4 rounded-lg font-semibold transition-colors text-sm sm:text-base">
                       Learn More
                     </Link>
-                    <button 
+                    <button
                       onClick={() => handleAddToCart(service)}
                       className="flex-1 bg-gray-600 hover:bg-gray-700 text-white text-center py-2 sm:py-2 px-4 rounded-lg font-semibold transition-colors text-sm sm:text-base"
                     >

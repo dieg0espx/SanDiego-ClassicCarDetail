@@ -7,17 +7,42 @@ export default function LoyaltyClub() {
   const [email, setEmail] = useState('')
   const [isSubscribed, setIsSubscribed] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsLoading(true)
-    
-    // Simulate API call
-    setTimeout(() => {
+    setError('')
+
+    try {
+      const response = await fetch('/api/loyalty-club', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        if (response.status === 409) {
+          setError('This email is already subscribed to our loyalty club!')
+        } else {
+          setError(data.error || 'Failed to subscribe. Please try again.')
+        }
+        setIsLoading(false)
+        return
+      }
+
       setIsSubscribed(true)
-      setIsLoading(false)
       setEmail('')
-    }, 1000)
+    } catch (error) {
+      console.error('Error subscribing to loyalty club:', error)
+      setError('Something went wrong. Please try again later.')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -98,6 +123,11 @@ export default function LoyaltyClub() {
                       className="w-full px-3 sm:px-4 py-3 sm:py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-gold focus:border-transparent transition-colors text-sm sm:text-base"
                     />
                   </div>
+                  {error && (
+                    <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-3 sm:p-4">
+                      <p className="text-sm text-red-300">{error}</p>
+                    </div>
+                  )}
                   <button
                     type="submit"
                     disabled={isLoading}
@@ -113,7 +143,7 @@ export default function LoyaltyClub() {
                   </svg>
                   <h3 className="text-lg sm:text-xl font-bold text-white mb-2">Welcome to the Club!</h3>
                   <p className="text-sm sm:text-base text-gray-300">
-                    You're now part of our exclusive loyalty club. Check your email for your first member discount!
+                    You're now part of our exclusive loyalty club.
                   </p>
                 </div>
               )}

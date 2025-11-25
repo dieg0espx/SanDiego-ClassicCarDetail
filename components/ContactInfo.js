@@ -98,53 +98,6 @@ export default function ContactInfo() {
           </a>
         </div>
       </div>
-
-      {/* Social Media */}
-      <div className="bg-white rounded-2xl shadow-xl p-8">
-        <h3 className="text-2xl font-bold text-black mb-6">Follow Us</h3>
-        
-        <div className="flex space-x-4">
-          <a
-            href="https://facebook.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center w-12 h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200"
-          >
-            <i className="bi bi-facebook text-xl"></i>
-          </a>
-          
-          <a
-            href="https://instagram.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg transition-colors duration-200"
-          >
-            <i className="bi bi-instagram text-xl"></i>
-          </a>
-          
-          <a
-            href="https://youtube.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center w-12 h-12 bg-gold hover:bg-gold/90 text-white rounded-lg transition-colors duration-200"
-          >
-            <i className="bi bi-youtube text-xl"></i>
-          </a>
-          
-          <a
-            href="https://tiktok.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center w-12 h-12 bg-black hover:bg-gray-800 text-white rounded-lg transition-colors duration-200"
-          >
-            <i className="bi bi-tiktok text-xl"></i>
-          </a>
-        </div>
-        
-        <p className="text-sm text-gray-600 mt-4">
-          Follow us for car care tips, before & after photos, and special offers!
-        </p>
-      </div>
     </div>
   )
 }

@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 
-export default function DateTimePicker({ onDateTimeSelected, selectedDate, selectedTime, onNext, refreshTrigger, showDebug = false }) {
+export default function DateTimePicker({ onDateTimeSelected, selectedDate, selectedTime, onNext, refreshTrigger, showDebug = false, hideNextButton = false }) {
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [availableTimes, setAvailableTimes] = useState([])
   const [selectedDateState, setSelectedDateState] = useState(selectedDate || '')
@@ -99,12 +99,11 @@ export default function DateTimePicker({ onDateTimeSelected, selectedDate, selec
     setAvailabilityError(null)
     try {
       if (showDebug) console.log('🔍 Checking availability for date:', date)
-      
+
       const { data: existingBookings, error } = await supabase
         .from('orders')
-        .select('scheduled_time, status, customer_info, items, created_at')
+        .select('scheduled_time, status, payment_status, customer_info, items, created_at')
         .eq('scheduled_date', date)
-        .in('status', ['pending', 'confirmed', 'in_progress'])
         .order('created_at', { ascending: false }) // Get most recent bookings first
 
       if (error) {
@@ -113,13 +112,42 @@ export default function DateTimePicker({ onDateTimeSelected, selectedDate, selec
         return
       }
 
-      if (showDebug) console.log('📅 Existing bookings found:', existingBookings)
+      // Filter bookings that are active (not cancelled or completed)
+      const activeBookings = existingBookings?.filter(booking => {
+        const status = booking.status || ''
+        const paymentStatus = booking.payment_status || ''
+
+        // Log for debugging
+        console.log('🔍 Checking booking:', {
+          time: booking.scheduled_time,
+          status,
+          paymentStatus,
+          customer: booking.customer_info?.firstName
+        })
+
+        // Exclude if status is explicitly cancelled or completed
+        if (['cancelled', 'completed'].includes(status.toLowerCase())) {
+          console.log('❌ Excluding cancelled/completed booking:', booking.scheduled_time)
+          return false
+        }
+
+        // Include booking if status OR payment_status indicates it's active
+        const isActiveStatus = ['pending', 'confirmed', 'in_progress', 'paid'].includes(status.toLowerCase())
+        const isActivePayment = ['pending', 'confirmed', 'paid'].includes(paymentStatus.toLowerCase())
+
+        const shouldInclude = isActiveStatus || isActivePayment
+        console.log('✅ Booking decision:', shouldInclude ? 'INCLUDE' : 'EXCLUDE')
+
+        return shouldInclude
+      }) || []
+
+      if (showDebug) console.log('📅 Active bookings found:', activeBookings)
 
       // Create a set of booked time slots with additional info
       const bookedTimes = new Set()
       const bookingDetails = new Map() // Store booking details for debugging
-      
-      existingBookings?.forEach(booking => {
+
+      activeBookings.forEach(booking => {
         if (booking.scheduled_time) {
           // Normalize time format - convert HH:MM:SS to HH:MM
           const normalizedTime = booking.scheduled_time.substring(0, 5) // Take only HH:MM part
@@ -348,7 +376,7 @@ export default function DateTimePicker({ onDateTimeSelected, selectedDate, selec
                       key={time.value}
                       onClick={() => !isBooked && handleTimeChange(time.value)}
                       disabled={isBooked}
-                      className={`p-2 sm:p-3 text-center rounded-lg border-2 transition-all text-sm sm:text-base relative ${
+                      className={`p-3 sm:p-3 text-center rounded-lg border-2 transition-all text-sm sm:text-base relative ${
                         isBooked
                           ? 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed'
                           : isSelected
@@ -357,7 +385,7 @@ export default function DateTimePicker({ onDateTimeSelected, selectedDate, selec
                       }`}
                       title={isBooked ? 'This time slot is already booked' : ''}
                     >
-                      <div className="font-medium">{time.label}</div>
+                      <div className="font-medium whitespace-nowrap">{time.label}</div>
                       {isBooked && (
                         <div className="absolute top-1 right-1">
                           <svg className="w-3 h-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
@@ -435,20 +463,22 @@ export default function DateTimePicker({ onDateTimeSelected, selectedDate, selec
         </div>
       </div>
 
-      {/* Next Button */}
-      <div className="mt-6 flex justify-end">
-        <button
-          onClick={handleNext}
-          disabled={!selectedDateState || !selectedTimeState}
-          className={`px-8 py-3 rounded-lg font-medium transition-colors ${
-            selectedDateState && selectedTimeState
-              ? 'bg-gold hover:bg-gold text-white'
-              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-          }`}
-        >
-          Next
-        </button>
-      </div>
+      {/* Next Button - conditionally rendered */}
+      {!hideNextButton && (
+        <div className="mt-6 flex justify-end">
+          <button
+            onClick={handleNext}
+            disabled={!selectedDateState || !selectedTimeState}
+            className={`px-8 py-3 rounded-lg font-medium transition-colors ${
+              selectedDateState && selectedTimeState
+                ? 'bg-gold hover:bg-gold text-white'
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            }`}
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   )
 }
