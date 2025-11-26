@@ -144,30 +144,36 @@ export async function POST(request) {
       })
     }
 
-    // If no payment_intent, we need to manually create one for the invoice
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: invoice.amount_due,
-      currency: invoice.currency,
-      customer: customer.id,
-      metadata: {
-        invoice_id: invoice.id,
-        subscription_id: subscription.id,
-        order_id: orderData.order_id || '',
-      },
-      automatic_payment_methods: {
-        enabled: true,
-      },
+    // If no payment_intent on invoice, finalize it to create one
+    // This happens when the invoice is in 'draft' status
+    console.log('No payment_intent on invoice, finalizing invoice...')
+
+    const finalizedInvoice = await stripe.invoices.finalizeInvoice(invoice.id, {
+      expand: ['payment_intent']
     })
 
-    console.log('Created manual payment intent:', paymentIntent.id)
+    console.log('Finalized invoice status:', finalizedInvoice.status)
+    console.log('Finalized invoice payment_intent:', finalizedInvoice.payment_intent)
 
-    return NextResponse.json({
-      subscriptionId: subscription.id,
-      clientSecret: paymentIntent.client_secret,
-      customerId: customer.id,
-      invoiceId: invoice.id,
-      isSetupIntent: false
-    })
+    if (finalizedInvoice.payment_intent) {
+      const paymentIntent = typeof finalizedInvoice.payment_intent === 'string'
+        ? await stripe.paymentIntents.retrieve(finalizedInvoice.payment_intent)
+        : finalizedInvoice.payment_intent
+
+      return NextResponse.json({
+        subscriptionId: subscription.id,
+        clientSecret: paymentIntent.client_secret,
+        customerId: customer.id,
+        invoiceId: finalizedInvoice.id,
+        isSetupIntent: false
+      })
+    }
+
+    // This shouldn't happen, but handle gracefully
+    return NextResponse.json(
+      { error: 'Unable to create payment for subscription' },
+      { status: 500 }
+    )
   } catch (error) {
     console.error('Error creating subscription:', error)
     return NextResponse.json(
