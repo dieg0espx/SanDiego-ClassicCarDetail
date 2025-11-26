@@ -282,9 +282,17 @@ export default function Dashboard() {
     ))
   }
 
+  // Check if user has active subscription
+  const hasActiveSubscription = orders.some(order =>
+    order.is_subscription &&
+    order.subscription_id &&
+    ['pending', 'confirmed', 'paid'].includes(order.payment_status)
+  )
+
   const tabs = [
     { id: 'overview', label: 'Overview', icon: 'M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z' },
     { id: 'appointments', label: 'Appointments', icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' },
+    ...(hasActiveSubscription ? [{ id: 'subscription', label: 'Monthly Maintenance', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' }] : []),
     { id: 'history', label: 'Service History', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' }
   ]
 
@@ -756,6 +764,149 @@ export default function Dashboard() {
                     </a> */}
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Monthly Maintenance Subscription Tab */}
+            {activeTab === 'subscription' && hasActiveSubscription && (
+              <div className="space-y-6">
+                <div className="bg-gold rounded-lg p-6 text-white">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    <div>
+                      <h3 className="text-xl font-bold">Monthly Maintenance Plan</h3>
+                      <p className="text-white/90 text-sm">Active Subscription - $160/month</p>
+                    </div>
+                  </div>
+                  <p className="text-white/90">
+                    Book your monthly detailing appointments here. As a subscriber, you can schedule services anytime without additional payment.
+                  </p>
+                </div>
+
+                {/* Show subscription appointments */}
+                {(() => {
+                  const subscriptionAppointments = orders.filter(order =>
+                    (order.is_subscription || order.payment_method === 'subscription') &&
+                    order.scheduled_date &&
+                    ['pending', 'confirmed', 'paid'].includes(order.payment_status || order.status)
+                  ).sort((a, b) => new Date(a.scheduled_date) - new Date(b.scheduled_date))
+
+                  if (subscriptionAppointments.length > 0) {
+                    return (
+                      <div className="bg-white rounded-lg border border-gray-200 p-6">
+                        <h4 className="text-lg font-semibold text-gray-900 mb-4">Your Scheduled Appointments</h4>
+                        <div className="space-y-3">
+                          {subscriptionAppointments.map((order) => (
+                            <div key={order.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                              <div className="flex items-start space-x-3 flex-1">
+                                <svg className="w-5 h-5 text-gold mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                <div className="flex-1">
+                                  <p className="font-medium text-gray-900">
+                                    {order.scheduled_date && new Date(order.scheduled_date + 'T00:00:00').toLocaleDateString('en-US', {
+                                      weekday: 'long',
+                                      year: 'numeric',
+                                      month: 'long',
+                                      day: 'numeric'
+                                    })}
+                                  </p>
+                                  <p className="text-sm text-gray-600">
+                                    {order.scheduled_time && `${parseInt(order.scheduled_time.split(':')[0]) > 12
+                                      ? `${parseInt(order.scheduled_time.split(':')[0]) - 12}:00 PM`
+                                      : `${order.scheduled_time} AM`}`}
+                                  </p>
+                                  {order.location?.fullAddress && (
+                                    <p className="text-sm text-gray-500 mt-1">{order.location.fullAddress}</p>
+                                  )}
+                                  <span className={`inline-block mt-2 px-2 py-1 text-xs font-medium rounded-full ${
+                                    order.status === 'confirmed' || order.status === 'paid'
+                                      ? 'bg-green-100 text-green-800'
+                                      : order.status === 'pending'
+                                      ? 'bg-yellow-100 text-yellow-800'
+                                      : 'bg-gray-100 text-gray-800'
+                                  }`}>
+                                    {order.status === 'confirmed' || order.status === 'paid' ? 'Confirmed' :
+                                     order.status === 'pending' ? 'Pending' : order.status}
+                                  </span>
+                                </div>
+                              </div>
+                              <button
+                                onClick={() => handleCancelClick(order)}
+                                disabled={cancelingOrderId === order.id}
+                                className="ml-4 px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                {cancelingOrderId === order.id ? 'Canceling...' : 'Cancel'}
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  }
+                  return null
+                })()}
+
+                <div className="bg-white rounded-lg border border-gray-200 p-6">
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Schedule Your Next Service</h4>
+                  <p className="text-gray-600 mb-6">
+                    Ready to schedule your monthly detailing? Click below to choose your preferred date and time.
+                  </p>
+
+                  <a
+                    href="/subscription-booking"
+                    className="inline-flex items-center justify-center bg-gold hover:bg-gold text-white font-medium px-6 py-3 rounded-lg transition-colors"
+                  >
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Book Monthly Service
+                  </a>
+                </div>
+
+                <div className="bg-white rounded-lg border border-gray-200 p-6">
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Subscription Benefits</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex items-start space-x-3">
+                      <svg className="w-5 h-5 text-gold mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <div>
+                        <p className="font-medium text-gray-900">Priority Booking</p>
+                        <p className="text-sm text-gray-600">Get first access to appointment slots</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <svg className="w-5 h-5 text-gold mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <div>
+                        <p className="font-medium text-gray-900">No Payment Hassle</p>
+                        <p className="text-sm text-gray-600">Book without entering payment details</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <svg className="w-5 h-5 text-gold mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <div>
+                        <p className="font-medium text-gray-900">Consistent Care</p>
+                        <p className="text-sm text-gray-600">Keep your vehicle showroom-ready</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <svg className="w-5 h-5 text-gold mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <div>
+                        <p className="font-medium text-gray-900">Cancel Anytime</p>
+                        <p className="text-sm text-gray-600">No long-term commitment required</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 

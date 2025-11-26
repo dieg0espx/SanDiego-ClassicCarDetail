@@ -245,8 +245,8 @@ export default function Header() {
                   )}
                 </AnimatePresence>
               </motion.button>
-              <motion.a 
-                href="#quote" 
+              <motion.a
+                href="/services"
                 className="bg-gold hover:bg-gold/90 text-white font-bold px-6 py-2 rounded-lg transition-colors flex items-center space-x-2"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -464,8 +464,8 @@ export default function Header() {
                     )}
                     
                     {/* Book Now Button */}
-                    <a 
-                      href="#quote" 
+                    <a
+                      href="/services"
                       className="block w-full bg-gold hover:bg-gold/90 text-white font-bold px-6 py-3 rounded-lg transition-colors text-center mt-4"
                       onClick={() => setIsMenuOpen(false)}
                     >

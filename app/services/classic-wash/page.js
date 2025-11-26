@@ -24,7 +24,6 @@ export default function ClassicWash() {
 
   const handleAddToCart = () => {
     addItem(serviceData)
-    alert('Service added to cart! You can review your order in the cart.')
   }
 
   return (
@@ -68,16 +67,16 @@ export default function ClassicWash() {
                 vehicle's finish.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                <button 
+                <button
                   onClick={handleAddToCart}
-                  className="bg-gold hover:bg-gold text-white px-6 sm:px-8 py-3 rounded-lg font-semibold transition-colors text-center text-sm sm:text-base"
+                  className="bg-gold hover:bg-gold text-white px-6 sm:px-8 py-3 rounded-lg font-semibold transition-colors text-center text-sm"
                 >
                   Add to Cart - $170
                 </button>
-                <a href="tel:(760) 518-8451" className="bg-gray-600 hover:bg-gray-700 text-white px-6 sm:px-8 py-3 rounded-lg font-semibold transition-colors text-center text-sm sm:text-base">
+                <a href="tel:(760) 518-8451" className="bg-gray-600 hover:bg-gray-700 text-white px-6 sm:px-8 py-3 rounded-lg font-semibold transition-colors text-center text-sm">
                   Call (760) 518-8451
                 </a>
-                <Link href="/services" className="bg-transparent border-2 border-gray-600 text-gray-600 hover:bg-gray-600 hover:text-white px-6 sm:px-8 py-3 rounded-lg font-semibold transition-colors text-center text-sm sm:text-base">
+                <Link href="/services" className="bg-transparent border-2 border-gray-600 text-gray-600 hover:bg-gray-600 hover:text-white px-6 sm:px-8 py-3 rounded-lg font-semibold transition-colors text-center text-sm">
                   View All Services
                 </Link>
               </div>
