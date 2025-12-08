@@ -34,7 +34,7 @@ export default function Stats() {
 
   const stats = [
     {
-      end: 10,
+      end: 6,
       suffix: '+',
       label: 'Years Experience'
     },
