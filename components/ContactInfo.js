@@ -65,7 +65,7 @@ export default function ContactInfo() {
             </div>
             <div>
               <h4 className="text-lg font-semibold text-black">Email</h4>
-              <p className="text-gray-600">info@sandiegoclassiccardetail.com</p>
+              <p className="text-gray-600">sdclassicautodetail@outlook.com</p>
               <p className="text-sm text-gray-600">We respond within 24 hours</p>
             </div>
           </div>
