@@ -15,7 +15,7 @@ export default function Hero() {
         animate={{ scale: 1 }}
         transition={{ duration: 2, ease: "easeOut" }}
       >
-        <source src="https://res.cloudinary.com/dku1gnuat/video/upload/v1757677265/Untitled_design_5_v03wjj.mp4" type="video/mp4" />
+        <source src="https://pub-654c1ed6a1fa453aa8c8e5db0038b8cf.r2.dev/Untitled_design_5_v03wjj.mp4" type="video/mp4" />
       </motion.video>
 
       {/* Palm trees overlay */}
